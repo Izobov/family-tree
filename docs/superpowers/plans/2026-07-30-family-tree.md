@@ -26,6 +26,8 @@
 - **`parent()` есть только у `load`-событий, у form actions его нет.** В actions дерево и людей получаем через `requireTree(locals.supabase, userId)` и `fetchPeople(locals.supabase, treeId)` из `$lib/server/people`.
 - **Все вызовы `supabase db query` идут с флагом `--linked`.** По умолчанию CLI работает с локальной базой в Docker, которая здесь не поднята. Пароль БД нигде не нужен — CLI авторизован и ходит через Management API.
 - **Настройки проекта Supabase меняем через `supabase/config.toml` + `supabase config push`**, а не кликами в дашборде: так изменение попадает в git и воспроизводится.
+- **`trees.owner_id` уникален** (вторая миграция, добавлена при доработке задачи 5). Один пользователь — одно дерево, инвариант держит БД. Это то, что делает `ensureTree` безопасным при гонке и делает `.maybeSingle()` в `loadTree` доказуемо корректным.
+- **Дерево и настройки создаёт только `ensureTree` в `(app)/+layout.server.ts`.** Регистрация их не создаёт: две вставки из клиента неатомарны, и при частичном сбое пользователь остался бы с сессией, но без дерева и без пути починиться.
 
 ---
 
@@ -1380,14 +1382,16 @@ export const actions: Actions = {
     const { data, error } = await locals.supabase.auth.signUp({ email, password });
     if (error || !data.user) return fail(400, { error: t.auth.emailTaken });
 
-    // Подтверждение email выключено, поэтому сессия уже активна и RLS пропустит вставку.
-    const [{ error: treeError }, { error: settingsError }] = await Promise.all([
-      locals.supabase.from('trees').insert({ owner_id: data.user.id, name: t.app.myTree }),
-      locals.supabase.from('user_settings').insert({ user_id: data.user.id, locale: locals.locale })
-    ]);
-
-    if (treeError || settingsError) return fail(500, { error: t.errors.unavailable });
-
+    /**
+     * Дерево и настройки здесь НЕ создаём. Две отдельные вставки нельзя выполнить
+     * атомарно из клиента: Supabase не бросает исключение на ошибке БД, а
+     * возвращает {error}, поэтому при сбое второй вставки первая осталась бы
+     * висеть, а пользователь — с активной сессией и без пути дописать
+     * недостающую строку. Вместо этого дерево создаёт `ensureTree` в
+     * `(app)/+layout.server.ts` — идемпотентно, при каждом входе в приложение.
+     * Один путь создания вместо двух, и он же лечит пользователей, появившихся
+     * мимо этой формы.
+     */
     redirect(303, '/');
   }
 };
@@ -2095,6 +2099,56 @@ export async function loadTree(
 }
 
 /**
+ * Гарантирует, что у пользователя есть дерево и настройки, и возвращает дерево.
+ * Идемпотентна: вызывается на каждый вход в приложение.
+ *
+ * Почему так, а не при регистрации: две вставки из клиента нельзя сделать
+ * атомарно, и при частичном сбое пользователь остался бы с активной сессией и
+ * без дерева, без пути починиться. Здесь же любой такой пользователь лечится
+ * сам при следующем открытии приложения — включая созданных вручную или
+ * будущим OAuth.
+ *
+ * Гонка двух одновременных запросов безопасна: `trees.owner_id` уникален, второй
+ * insert падает на конфликте, и мы просто перечитываем строку.
+ */
+export async function ensureTree(
+  supabase: SupabaseClient,
+  userId: string,
+  locale: Locale,
+  treeName: string
+): Promise<Tree | null> {
+  const existing = await supabase
+    .from('trees')
+    .select('id, owner_id, name, root_person_id')
+    .eq('owner_id', userId)
+    .maybeSingle();
+
+  if (existing.data) return existing.data as Tree;
+
+  // Настройки: user_id — первичный ключ, поэтому upsert идемпотентен сам по себе.
+  await supabase
+    .from('user_settings')
+    .upsert({ user_id: userId, locale }, { onConflict: 'user_id' });
+
+  const created = await supabase
+    .from('trees')
+    .insert({ owner_id: userId, name: treeName })
+    .select('id, owner_id, name, root_person_id')
+    .maybeSingle();
+
+  if (created.data) return created.data as Tree;
+
+  // Конфликт уникальности означает, что дерево создал параллельный запрос.
+  const retry = await supabase
+    .from('trees')
+    .select('id, owner_id, name, root_person_id')
+    .eq('owner_id', userId)
+    .maybeSingle();
+
+  return (retry.data as Tree) ?? null;
+}
+
+/**
  * Дерево текущего пользователя для form actions.
  * В actions нет parent() — он существует только у load-событий, — поэтому
  * дерево здесь запрашивается напрямую.
@@ -2396,12 +2450,17 @@ git commit -m "feat: слой доступа к people/spouses с примене
 
 ```ts
 import { error } from '@sveltejs/kit';
-import { loadTree } from '$lib/server/people';
+import { dict } from '$lib/i18n';
+import { ensureTree, loadTree } from '$lib/server/people';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
   const { userId } = await locals.safeGetSession();
   // guard в hooks.server.ts уже отсёк неавторизованных
+
+  // Дерево создаётся здесь, а не при регистрации: идемпотентно и самовосстанавливается.
+  await ensureTree(locals.supabase, userId!, locals.locale, dict(locals.locale).app.myTree);
+
   const loaded = await loadTree(locals.supabase, userId!);
   if (!loaded) error(503, 'tree-unavailable');
 
