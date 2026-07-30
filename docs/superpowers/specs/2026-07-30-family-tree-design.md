@@ -281,8 +281,18 @@ create policy subs_own on push_subscriptions for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 ```
 
-Для `notifications_sent` политик нет — таблица доступна только серверу под
-`service_role`, который RLS обходит.
+Для `notifications_sent` политик нет — таблица доступна только серверу под секретным
+ключом, который RLS обходит.
+
+Все политики объявляются с `to authenticated` и с `(select auth.uid())` в подзапросе:
+без `TO` политика проверяется и для `anon`, а голый `auth.uid()` пересчитывается на
+каждую строку. `for all` покрывает и `using`, и `with check` — без `with check`
+пользователь смог бы переписать `owner_id` на чужой.
+
+**Экспозиция в Data API.** С 28 апреля 2026 новые таблицы в схеме `public` больше не
+попадают в Supabase Data API автоматически. Значит после миграции нужен явный
+`grant` для роли `authenticated` и проверка запросом — иначе PostgREST будет отдавать
+пустоту без внятной ошибки.
 
 В дереве хранятся телефоны и инстаграмы живой родни — персональные данные третьих
 лиц. Следствия обязательные, не рекомендательные: политики RLS покрыты тестом (§8),
@@ -529,8 +539,8 @@ Playwright, один сквозной путь: регистрация → до�
 | Переменная | Где нужна |
 |---|---|
 | `PUBLIC_SUPABASE_URL` | клиент и сервер |
-| `PUBLIC_SUPABASE_ANON_KEY` | клиент и сервер |
-| `SUPABASE_SERVICE_ROLE_KEY` | только крон; в клиентский бандл не попадает |
+| `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | клиент и сервер (publishable, не legacy `anon`) |
+| `SUPABASE_SECRET_KEY` | только крон; в клиентский бандл не попадает |
 | `VAPID_PUBLIC_KEY` | клиент (подписка) и сервер |
 | `VAPID_PRIVATE_KEY` | только сервер |
 | `VAPID_SUBJECT` | только сервер (`mailto:…`) |
