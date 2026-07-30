@@ -7,17 +7,39 @@ import { parseLocale } from '$lib/i18n';
 const PROTECTED = ['/', '/person', '/events', '/settings'];
 
 const supabase: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-		cookies: {
-			getAll: () => event.cookies.getAll(),
-			setAll(cookiesToSet, headers) {
-				cookiesToSet.forEach(({ name, value, options }) =>
-					event.cookies.set(name, value, { ...options, path: '/' })
-				);
-				if (Object.keys(headers).length > 0) event.setHeaders(headers);
+	/**
+	 * SvelteKit's setHeaders() throws if the same header is set twice in one
+	 * request, and @supabase/ssr calls setAll() more than once per request —
+	 * signUp() does it twice while storing the PKCE code verifier, each time
+	 * forwarding the same Cache-Control hint. Without this guard the second
+	 * call crashes the request with `"Cache-Control" header is already set`.
+	 * The hints are idempotent, so setting each name once is correct.
+	 */
+	const headersAlreadySet = new Set<string>();
+
+	event.locals.supabase = createServerClient(
+		PUBLIC_SUPABASE_URL,
+		PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+		{
+			cookies: {
+				getAll: () => event.cookies.getAll(),
+				setAll(cookiesToSet, headers) {
+					cookiesToSet.forEach(({ name, value, options }) =>
+						event.cookies.set(name, value, { ...options, path: '/' })
+					);
+
+					const fresh: Record<string, string> = {};
+					for (const [name, value] of Object.entries(headers)) {
+						const key = name.toLowerCase();
+						if (headersAlreadySet.has(key)) continue;
+						headersAlreadySet.add(key);
+						fresh[name] = value;
+					}
+					if (Object.keys(fresh).length > 0) event.setHeaders(fresh);
+				}
 			}
 		}
-	});
+	);
 
 	/**
 	 * getClaims проверяет подпись JWT локально по кэшированным ключам.
