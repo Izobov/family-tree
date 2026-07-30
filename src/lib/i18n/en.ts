@@ -1,0 +1,101 @@
+import type { ru } from './ru';
+
+export const en = {
+  app: { name: 'Family Tree', myTree: 'My tree' },
+  nav: { tree: 'Tree', events: 'Events', settings: 'Settings', signOut: 'Sign out' },
+  auth: {
+    signInTitle: 'Sign in',
+    signUpTitle: 'Sign up',
+    email: 'Email',
+    password: 'Password',
+    signIn: 'Sign in',
+    signUp: 'Sign up',
+    toSignUp: 'No account? Sign up',
+    toSignIn: 'Already have an account? Sign in',
+    invalidCredentials: 'Wrong email or password',
+    emailTaken: 'This email is already taken',
+    passwordTooShort: 'Password is shorter than 6 characters'
+  },
+  onboarding: {
+    title: 'Tell us about yourself',
+    hint: 'The tree starts with you. Add everyone else later.',
+    submit: 'Create tree'
+  },
+  person: {
+    firstName: 'First name',
+    lastName: 'Last name',
+    gender: 'Gender',
+    male: 'Male',
+    female: 'Female',
+    birthDate: 'Date of birth',
+    diedOn: 'Date of death',
+    about: 'About',
+    email: 'Email',
+    phone: 'Phone',
+    telegram: 'Telegram',
+    instagram: 'Instagram',
+    contacts: 'Get in touch',
+    relatives: 'Relatives',
+    parents: 'Parents',
+    spouses: 'Spouses',
+    children: 'Children',
+    siblings: 'Siblings',
+    edit: 'Edit',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    showInTree: 'Show in tree',
+    addRelative: 'Add relative',
+    addFather: 'Father',
+    addMother: 'Mother',
+    addSpouse: 'Spouse',
+    addChild: 'Child',
+    marriedOn: 'Wedding date',
+    noData: 'Not set',
+    ageYears: ['year', 'years', 'years'] as [string, string, string]
+  },
+  errors: {
+    fatherMustBeMale: 'Only a male person can be a father',
+    motherMustBeFemale: 'Only a female person can be a mother',
+    cycle: 'This would make the person their own ancestor',
+    selfParent: 'A person cannot be their own parent',
+    otherTree: 'This person belongs to another tree',
+    diedBeforeBorn: 'Date of death is before date of birth',
+    firstNameRequired: 'First name is required',
+    badPhone: 'Phone must look like +19165551234',
+    badUsername: 'Latin letters, digits, dot and underscore only',
+    notFound: 'Person not found',
+    unavailable: 'Service is unavailable. Try again later.'
+  },
+  deleteDialog: {
+    title: 'Delete this person?',
+    orphans: 'Will be left without a parent:',
+    confirm: 'Delete',
+    cancel: 'Cancel'
+  },
+  events: {
+    title: 'Upcoming events',
+    today: 'Today',
+    thisWeek: 'This week',
+    thisMonth: 'This month',
+    empty: 'Nothing coming up',
+    birthday: 'Birthday',
+    anniversary: 'Wedding anniversary',
+    turns: 'turns',
+    yearsTogether: 'years together'
+  },
+  settings: {
+    title: 'Settings',
+    language: 'Language',
+    notifications: 'Notifications',
+    enablePush: 'Enable notifications',
+    disablePush: 'Disable notifications',
+    pushOn: 'Notifications are on',
+    pushOff: 'Notifications are off',
+    leadDays: 'Notify this many days ahead',
+    iosTitle: 'On iPhone and iPad',
+    iosHint: 'Notifications only work for an app installed on the home screen: open Share and pick "Add to Home Screen".',
+    unsupported: 'This browser does not support notifications'
+  },
+  offline: { banner: 'No connection. The tree is view-only.' }
+} satisfies typeof ru;
