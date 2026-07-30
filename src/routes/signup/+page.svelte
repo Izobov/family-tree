@@ -13,4 +13,5 @@
   altHref="/login"
   altLabel={t.auth.toSignIn}
   error={form?.error ?? null}
+  passwordAutocomplete="new-password"
 />

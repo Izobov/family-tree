@@ -7,7 +7,8 @@
     submitLabel,
     altHref,
     altLabel,
-    error = null
+    error = null,
+    passwordAutocomplete = 'current-password'
   }: {
     t: Dict;
     title: string;
@@ -15,6 +16,7 @@
     altHref: string;
     altLabel: string;
     error?: string | null;
+    passwordAutocomplete?: 'current-password' | 'new-password';
   } = $props();
 </script>
 
@@ -29,7 +31,7 @@
 
     <label>
       {t.auth.password}
-      <input name="password" type="password" autocomplete="current-password" required />
+      <input name="password" type="password" autocomplete={passwordAutocomplete} required />
     </label>
 
     {#if error}<p class="error" role="alert">{error}</p>{/if}
