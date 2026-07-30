@@ -24,6 +24,8 @@
 - Даты в БД — `date` (без времени). В коде — ISO-строки `YYYY-MM-DD`.
 - Все пользовательские строки идут через `i18n`. Хардкод русского или английского текста в компонентах запрещён.
 - **`parent()` есть только у `load`-событий, у form actions его нет.** В actions дерево и людей получаем через `requireTree(locals.supabase, userId)` и `fetchPeople(locals.supabase, treeId)` из `$lib/server/people`.
+- **Все вызовы `supabase db query` идут с флагом `--linked`.** По умолчанию CLI работает с локальной базой в Docker, которая здесь не поднята. Пароль БД нигде не нужен — CLI авторизован и ходит через Management API.
+- **Настройки проекта Supabase меняем через `supabase/config.toml` + `supabase config push`**, а не кликами в дашборде: так изменение попадает в git и воспроизводится.
 
 ---
 
@@ -746,13 +748,29 @@ git commit -m "feat: двуязычные словари ru/en и форматт
 - Consumes: ничего
 - Produces: таблицы `trees`, `people`, `spouses`, `user_settings`, `push_subscriptions`, `notifications_sent` с RLS и grant'ами в проекте `upajaaztxuldkqocjjse`
 
-- [ ] **Step 1: Слинковать проект**
+- [ ] **Step 1: Инициализировать проект Supabase**
+
+Проект **уже слинкован** контроллером (`supabase link --project-ref upajaaztxuldkqocjjse`
+выполнен, каталог `supabase/.temp` на месте). Пароль БД не нужен: CLI авторизован и ходит
+к удалённой базе через login role и Management API.
+
+Осталось создать `config.toml` — без него `supabase migration new` не заработает:
 
 ```bash
-supabase link --project-ref upajaaztxuldkqocjjse
+supabase init
 ```
 
-Понадобится пароль БД из Dashboard → Settings → Database.
+Если CLI спросит про перезапись — отвечать «нет» ни на что не придётся, каталог пуст,
+кроме `.temp`. На вопросы про настройки редакторов отвечать отказом.
+
+Проверить связь с удалённой базой:
+
+```bash
+supabase migration list --linked
+```
+
+Ожидается пустая таблица Local/Remote — миграций пока нет. Если команда не подключилась,
+это блокер: сообщить и остановиться, не пытаясь обойти через пароль или `db-url`.
 
 - [ ] **Step 2: Создать файл миграции**
 
@@ -910,18 +928,53 @@ supabase db advisors --linked
 - [ ] **Step 6: Проверить, что Data API реально отдаёт таблицы**
 
 ```bash
-supabase db query "select tablename from pg_tables where schemaname='public' order by tablename"
+supabase db query --linked "select tablename from pg_tables where schemaname='public' order by tablename"
 ```
 
 Ожидается 6 строк: `notifications_sent`, `people`, `push_subscriptions`, `spouses`, `trees`, `user_settings`.
 
-Если `supabase db query` недоступен (нужен CLI 2.79+) — выполнить тот же SQL в Dashboard → SQL Editor.
+Флаг `--linked` обязателен во **всех** вызовах `supabase db query` в этом плане: без него
+CLI по умолчанию идёт в локальную базу (`--local` включён по умолчанию), а локальный
+Postgres в Docker здесь не поднят, и команда упадёт на `dial tcp 127.0.0.1:54322`.
 
-- [ ] **Step 7: Выключить подтверждение email**
+- [ ] **Step 7: Выключить подтверждение email через config.toml**
 
-Dashboard → Authentication → Sign In / Providers → Email → **Confirm email: off**.
+Причина: на Free-плане с дефолтным SMTP письма жёстко лимитированы, а с 2026-06-03 новым
+проектам ещё и запрещено кастомизировать шаблоны. Без этого шага регистрация будет молча
+не завершаться, и задача 5 не пройдёт проверку.
 
-Причина: на Free-плане с дефолтным SMTP письма жёстко лимитированы, а с 2026-06-03 новым проектам ещё и запрещено кастомизировать шаблоны. Без этого шага регистрация будет молча не завершаться.
+Делаем декларативно, а не кликами в дашборде. В `supabase/config.toml` найти секцию
+`[auth.email]` и выставить:
+
+```toml
+[auth.email]
+enable_confirmations = false
+```
+
+Затем залить конфиг в проект:
+
+```bash
+supabase config push
+```
+
+CLI покажет diff того, что изменится на удалённом проекте, и попросит подтверждение.
+**Прочитать этот diff.** Ожидается изменение только `mailer_autoconfirm` (обратная сторона
+`enable_confirmations`). Если CLI собирается поменять что-то ещё существенное — например
+включить или выключить провайдеров входа, — остановиться и сообщить: `config push` заливает
+всю секцию `[auth]`, а не одно поле.
+
+Проверить, что применилось:
+
+```bash
+supabase config push
+```
+
+Повторный запуск на неизменённом конфиге должен сообщить, что расхождений нет.
+
+Отдельно зафиксировать в отчёте: `supabase init` пишет в `config.toml`
+`site_url = "http://localhost:3000"`, и `config push` отправляет это значение на проект.
+Для входа по паролю без подтверждения email это ни на что не влияет, но задача 19 (деплой)
+должна будет поменять `site_url` на продакшен-URL. Не менять его сейчас.
 
 - [ ] **Step 8: Записать `.env.example` и защитить `.env`**
 
@@ -1344,7 +1397,7 @@ npm run dev
 2. Проверить, что записи созданы:
 
 ```bash
-supabase db query "select (select count(*) from trees) as trees, (select count(*) from user_settings) as settings"
+supabase db query --linked "select (select count(*) from trees) as trees, (select count(*) from user_settings) as settings"
 ```
 
 Ожидается: `trees = 1`, `settings = 1`.
@@ -2453,7 +2506,7 @@ npm run dev
 Войти, открыть `/`. Ожидается форма «Расскажите о себе». Отправить с пустым именем — ожидается «Имя обязательно». Отправить с именем — ожидается текст «Дерево: 1».
 
 ```bash
-supabase db query "select first_name, gender from people; select root_person_id is not null as has_root from trees"
+supabase db query --linked "select first_name, gender from people; select root_person_id is not null as has_root from trees"
 ```
 
 Ожидается: одна строка человека и `has_root = true`.

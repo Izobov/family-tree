@@ -758,7 +758,7 @@ npm run dev
 5. Проверить БД:
 
 ```bash
-supabase db query "select count(*) as people from people; select count(*) as marriages from spouses"
+supabase db query --linked "select count(*) as people from people; select count(*) as marriages from spouses"
 ```
 
 - [ ] **Step 5: Коммит**
@@ -879,7 +879,7 @@ npm run dev
 4. Удалить корень дерева — ожидается, что приложение не падает (`trees.root_person_id` обнулился, диаграмма открылась на другом человеке).
 
 ```bash
-supabase db query "select root_person_id from trees"
+supabase db query --linked "select root_person_id from trees"
 ```
 
 - [ ] **Step 5: Коммит**
@@ -1085,7 +1085,7 @@ npm run dev
 
 1. Нажать `EN` — интерфейс переключается на английский, страница остаётся той же.
 2. Перезагрузить — язык сохранился.
-3. Проверить БД: `supabase db query "select locale from user_settings"` — ожидается `en`.
+3. Проверить БД: `supabase db query --linked "select locale from user_settings"` — ожидается `en`.
 4. В devtools включить Network → Offline — ожидается красная полоса с текстом про отсутствие сети.
 5. Нажать «Выйти» — ожидается редирект на `/login`.
 
@@ -2395,7 +2395,7 @@ npm run preview
 3. Проверить БД:
 
 ```bash
-supabase db query "select count(*) as subs from push_subscriptions; select push_enabled from user_settings"
+supabase db query --linked "select count(*) as subs from push_subscriptions; select push_enabled from user_settings"
 ```
 
 Ожидается `subs = 1`, `push_enabled = true`.
@@ -2630,7 +2630,7 @@ curl -s -H "Authorization: Bearer $(grep '^CRON_SECRET=' .env | cut -d= -f2)" \
 3. Вызвать повторно — ожидается `{"users":1,"sent":0,"pruned":0}`: дедупликация сработала.
 
 ```bash
-supabase db query "select kind, subject_key, event_date from notifications_sent"
+supabase db query --linked "select kind, subject_key, event_date from notifications_sent"
 ```
 
 - [ ] **Step 6: Залить переменные и задеплоить**
