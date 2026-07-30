@@ -1222,7 +1222,8 @@ git commit -m "feat: серверный клиент Supabase, валидаци�
     submitLabel,
     altHref,
     altLabel,
-    error = null
+    error = null,
+    passwordAutocomplete = 'current-password'
   }: {
     t: Dict;
     title: string;
@@ -1230,6 +1231,12 @@ git commit -m "feat: серверный клиент Supabase, валидаци�
     altHref: string;
     altLabel: string;
     error?: string | null;
+    /**
+     * На входе — 'current-password', чтобы менеджер паролей подставил
+     * существующий. На регистрации — 'new-password', иначе он предложит
+     * старый пароль вместо генерации нового.
+     */
+    passwordAutocomplete?: 'current-password' | 'new-password';
   } = $props();
 </script>
 
@@ -1244,7 +1251,7 @@ git commit -m "feat: серверный клиент Supabase, валидаци�
 
     <label>
       {t.auth.password}
-      <input name="password" type="password" autocomplete="current-password" required />
+      <input name="password" type="password" autocomplete={passwordAutocomplete} required />
     </label>
 
     {#if error}<p class="error" role="alert">{error}</p>{/if}
@@ -1404,6 +1411,7 @@ export const actions: Actions = {
   altHref="/login"
   altLabel={t.auth.toSignIn}
   error={form?.error ?? null}
+  passwordAutocomplete="new-password"
 />
 ```
 
