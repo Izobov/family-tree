@@ -1769,7 +1769,7 @@ export function validatePersonFields(input: PersonInput): Violation[] {
 npm run test:unit -- src/lib/tree/invariants.test.ts
 ```
 
-Ожидается: PASS (19 проверок).
+Ожидается: PASS (18 проверок: 5 на createsCycle, 7 на validateParent, 6 на validatePersonFields).
 
 - [ ] **Step 5: Коммит**
 
