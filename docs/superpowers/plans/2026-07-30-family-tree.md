@@ -23,6 +23,7 @@
 - Про `family-chart` знают только `src/lib/components/FamilyTree.svelte` и `src/lib/tree/card.ts`. Никакой другой файл не импортирует `family-chart`.
 - Даты в БД — `date` (без времени). В коде — ISO-строки `YYYY-MM-DD`.
 - Все пользовательские строки идут через `i18n`. Хардкод русского или английского текста в компонентах запрещён.
+- **`parent()` есть только у `load`-событий, у form actions его нет.** В actions дерево и людей получаем через `requireTree(locals.supabase, userId)` и `fetchPeople(locals.supabase, treeId)` из `$lib/server/people`.
 
 ---
 
@@ -1996,7 +1997,26 @@ export async function loadTree(
   };
 }
 
-async function fetchPeople(
+/**
+ * Дерево текущего пользователя для form actions.
+ * В actions нет parent() — он существует только у load-событий, — поэтому
+ * дерево здесь запрашивается напрямую.
+ */
+export async function requireTree(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Tree> {
+  const { data } = await supabase
+    .from('trees')
+    .select('id, owner_id, name, root_person_id')
+    .eq('owner_id', userId)
+    .maybeSingle();
+
+  if (!data) throw new Error('tree-not-found');
+  return data as Tree;
+}
+
+export async function fetchPeople(
   supabase: SupabaseClient,
   treeId: string
 ): Promise<PersonWithParents[]> {
@@ -2305,13 +2325,15 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 ```ts
 import { fail } from '@sveltejs/kit';
 import { dict } from '$lib/i18n';
-import { createPerson } from '$lib/server/people';
+import { createPerson, requireTree } from '$lib/server/people';
 import { readPersonForm, violationsToErrors } from '$lib/server/form';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
-  createFirst: async ({ request, locals, parent }) => {
-    const { tree } = await parent();
+  createFirst: async ({ request, locals }) => {
+    // В actions нет parent() — дерево запрашиваем сами.
+    const { userId } = await locals.safeGetSession();
+    const tree = await requireTree(locals.supabase, userId!);
     const t = dict(locals.locale);
     const input = readPersonForm(await request.formData());
 

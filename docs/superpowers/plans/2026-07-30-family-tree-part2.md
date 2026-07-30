@@ -461,13 +461,15 @@ git commit -m "feat: полный экран человека через shallow
 ```ts
 import { fail, redirect } from '@sveltejs/kit';
 import { dict } from '$lib/i18n';
-import { updatePerson } from '$lib/server/people';
+import { updatePerson, requireTree } from '$lib/server/people';
 import { readPersonForm, violationsToErrors } from '$lib/server/form';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
-  update: async ({ request, params, locals, parent }) => {
-    const { tree } = await parent();
+  update: async ({ request, params, locals }) => {
+    // В actions нет parent() — дерево запрашиваем сами.
+    const { userId } = await locals.safeGetSession();
+    const tree = await requireTree(locals.supabase, userId!);
     const t = dict(locals.locale);
     const input = readPersonForm(await request.formData());
 
@@ -580,8 +582,15 @@ git commit -m "feat: правка человека с валидацией по�
 ```ts
 import { error, fail, redirect } from '@sveltejs/kit';
 import { dict } from '$lib/i18n';
-import { createPerson, setParent, linkSpouse } from '$lib/server/people';
+import {
+  createPerson,
+  setParent,
+  linkSpouse,
+  requireTree,
+  fetchPeople
+} from '$lib/server/people';
 import { readPersonForm, violationsToErrors } from '$lib/server/form';
+import type { Violation } from '$lib/tree/invariants';
 import type { Actions, PageServerLoad } from './$types';
 
 const KINDS = ['father', 'mother', 'spouse', 'child'] as const;
@@ -599,8 +608,11 @@ export const load: PageServerLoad = async ({ params, url, parent }) => {
 };
 
 export const actions: Actions = {
-  create: async ({ request, params, locals, parent }) => {
-    const { tree, people } = await parent();
+  create: async ({ request, params, locals }) => {
+    // В actions нет parent() — дерево и людей запрашиваем сами.
+    const { userId } = await locals.safeGetSession();
+    const tree = await requireTree(locals.supabase, userId!);
+    const people = await fetchPeople(locals.supabase, tree.id);
     const t = dict(locals.locale);
     const form = await request.formData();
 
@@ -621,7 +633,7 @@ export const actions: Actions = {
       return fail(400, { errors: violationsToErrors(created.violations, t) });
     }
 
-    let linked: { ok: true } | { violations: ReturnType<typeof Array.prototype.slice> };
+    let linked: { ok: true } | { violations: Violation[] };
     if (kind === 'father' || kind === 'mother') {
       linked = await setParent(locals.supabase, tree.id, anchor.id, created.id, kind);
     } else if (kind === 'spouse') {
@@ -641,7 +653,7 @@ export const actions: Actions = {
     if ('violations' in linked) {
       // Связь не сложилась — не оставляем висячего человека в дереве.
       await locals.supabase.from('people').delete().eq('id', created.id).eq('tree_id', tree.id);
-      return fail(400, { errors: violationsToErrors(linked.violations as never, t) });
+      return fail(400, { errors: violationsToErrors(linked.violations, t) });
     }
 
     redirect(303, `/person/${created.id}`);
@@ -776,7 +788,7 @@ git commit -m "feat: добавление отца, матери, супруга
 
 ```ts
 import { error, redirect } from '@sveltejs/kit';
-import { deletePerson, orphansOf } from '$lib/server/people';
+import { deletePerson, orphansOf, requireTree } from '$lib/server/people';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
@@ -788,8 +800,10 @@ export const load: PageServerLoad = async ({ params, parent }) => {
 };
 
 export const actions: Actions = {
-  confirm: async ({ params, locals, parent }) => {
-    const { tree } = await parent();
+  confirm: async ({ params, locals }) => {
+    // В actions нет parent() — дерево запрашиваем сами.
+    const { userId } = await locals.safeGetSession();
+    const tree = await requireTree(locals.supabase, userId!);
     await deletePerson(locals.supabase, tree.id, params.id);
     redirect(303, '/');
   }
