@@ -2064,7 +2064,7 @@ git commit -m "feat: маппер БД в формат family-chart с двус�
 
 ```ts
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Gender, Spouse, Tree } from '$lib/types';
+import type { Gender, Locale, Spouse, Tree } from '$lib/types';
 import type { PersonWithParents } from '$lib/tree/to-family-chart';
 import {
   validateParent,
