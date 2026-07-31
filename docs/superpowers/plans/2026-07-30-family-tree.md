@@ -2141,12 +2141,22 @@ export async function ensureTree(
     .eq('owner_id', userId)
     .maybeSingle();
 
-  if (existing.data) return existing.data as Tree;
-
-  // Настройки: user_id — первичный ключ, поэтому upsert идемпотентен сам по себе.
-  await supabase
+  /**
+   * Настройки создаём независимо от дерева и ДО раннего возврата. Раньше upsert
+   * стоял внутри ветки создания дерева, поэтому выполнялся ровно один раз за всю
+   * жизнь пользователя: если он падал, повторные вызовы уходили в ранний возврат
+   * и настройки не появлялись уже никогда. Молча — а крон уведомлений читает
+   * оттуда locale и push_enabled, так что человек просто перестал бы получать
+   * уведомления без единого признака поломки.
+   * Upsert по первичному ключу идемпотентен, повторный вызов ничего не меняет.
+   */
+  const settings = await supabase
     .from('user_settings')
-    .upsert({ user_id: userId, locale }, { onConflict: 'user_id' });
+    .upsert({ user_id: userId, locale }, { onConflict: 'user_id', ignoreDuplicates: true });
+
+  if (settings.error) throw new Error(`settings-ensure-failed: ${settings.error.message}`);
+
+  if (existing.data) return existing.data as Tree;
 
   const created = await supabase
     .from('trees')
@@ -2185,11 +2195,23 @@ export async function requireTree(
   return data as Tree;
 }
 
+/**
+ * Бросает на ошибке чтения, а не возвращает пустой список. Это принципиально:
+ * все инварианты проверяются против этого списка, и пустой список из-за сбоя
+ * сети означал бы «у человека нет детей», «родителя не существует» — то есть
+ * проверки молча пропустили бы то, что обязаны отвергнуть. Отказ читать должен
+ * блокировать запись, а не разрешать её.
+ */
 export async function fetchPeople(
   supabase: SupabaseClient,
   treeId: string
 ): Promise<PersonWithParents[]> {
-  const { data } = await supabase.from('people').select(PERSON_COLUMNS).eq('tree_id', treeId);
+  const { data, error } = await supabase
+    .from('people')
+    .select(PERSON_COLUMNS)
+    .eq('tree_id', treeId);
+
+  if (error) throw new Error(`people-read-failed: ${error.message}`);
   return (data ?? []) as PersonWithParents[];
 }
 
@@ -2300,11 +2322,21 @@ export async function deletePerson(
   supabase: SupabaseClient,
   treeId: string,
   personId: string
-): Promise<{ ok: true }> {
+): Promise<{ ok: true } | { violations: Violation[] }> {
   // father_id/mother_id детей обнулит on delete set null,
   // строки spouses снесёт on delete cascade,
   // trees.root_person_id обнулит trees_root_fk.
-  await supabase.from('people').delete().eq('id', personId).eq('tree_id', treeId);
+  //
+  // Ошибку обязательно проверяем: без этого заблокированное удаление (протухший
+  // treeId, отказ RLS) отрапортовало бы успех, и пользователь получил бы
+  // подтверждение того, чего не произошло.
+  const { error } = await supabase
+    .from('people')
+    .delete()
+    .eq('id', personId)
+    .eq('tree_id', treeId);
+
+  if (error) return { violations: [{ field: '_', code: 'notFound' }] };
   return { ok: true };
 }
 ```

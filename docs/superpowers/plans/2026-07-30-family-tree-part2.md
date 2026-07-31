@@ -804,7 +804,12 @@ export const actions: Actions = {
     // В actions нет parent() — дерево запрашиваем сами.
     const { userId } = await locals.safeGetSession();
     const tree = await requireTree(locals.supabase, userId!);
-    await deletePerson(locals.supabase, tree.id, params.id);
+
+    const result = await deletePerson(locals.supabase, tree.id, params.id);
+    // Не редиректим как при успехе, если удаление не прошло: иначе человек
+    // вернётся в дерево и увидит там того, кого «удалил».
+    if ('violations' in result) error(503, 'delete-failed');
+
     redirect(303, '/');
   }
 };
