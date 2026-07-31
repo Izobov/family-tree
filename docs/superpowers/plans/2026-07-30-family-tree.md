@@ -2992,6 +2992,9 @@ export function renderCard(
 ```css
 .ft-card {
   box-sizing: border-box;
+  /* Явный color обязателен: библиотечное правило `.f3 div.card { color:
+     var(--text-color) }` иначе красит имя белым по белому. */
+  color: var(--fg);
   width: 220px;
   min-height: var(--tap);
   padding: var(--space-3);
@@ -3111,12 +3114,16 @@ git commit -m "feat: HTML-карточки со счётчиками родст�
 
 ```svelte
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import type { Spouse, Locale } from '$lib/types';
   import type { Dict } from '$lib/i18n';
   import { toFamilyChart, type PersonWithParents } from '$lib/tree/to-family-chart';
   import { renderCard } from '$lib/tree/card';
   import '$lib/styles/cards.css';
+  // Библиотечные стили обязательны: без них svg.main_svg не получает
+  // width/height и диаграмма не занимает контейнер (карточка «прилипает»
+  // в угол вместо центрирования на главном человеке).
+  import 'family-chart/styles/family-chart.css';
 
   let {
     people,
@@ -3179,11 +3186,14 @@ git commit -m "feat: HTML-карточки со счётчиками родст�
 
     if (rootId) chart.updateMainId(rootId);
     chart.updateTree({ initial: true, tree_position: 'main_to_middle' });
+  });
 
-    return () => {
-      chart = null;
-      host.innerHTML = '';
-    };
+  // onMount здесь async, поэтому Svelte не может использовать возвращаемую из
+  // него функцию как cleanup — тип onMount это запрещает, и svelte-check падает.
+  // Cleanup вынесен в onDestroy, поведение то же.
+  onDestroy(() => {
+    chart = null;
+    if (host) host.innerHTML = '';
   });
 
   /**
@@ -3198,7 +3208,10 @@ git commit -m "feat: HTML-карточки со счётчиками родст�
   });
 </script>
 
-<div class="tree" bind:this={host}></div>
+<!-- Класс f3 обязателен: библиотечный CSS скопит все свои правила под селектором
+     `.f3 ...`, включая `svg.main_svg { width/height: 100% }`, без которого
+     диаграмма не растягивается на контейнер. -->
+<div class="f3 tree" bind:this={host}></div>
 
 <style>
   .tree {
