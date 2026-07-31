@@ -109,6 +109,24 @@ describe('validateParent', () => {
       code: 'notFound'
     });
   });
+
+  /**
+   * Единственный тест, проходящий через createsCycle изнутри validateParent.
+   * Без него перепутанный порядок аргументов в вызове createsCycle остался бы
+   * незамеченным: все остальные тесты прошли бы, а защита от циклов проверяла
+   * бы обратное направление. Здесь при обратном порядке результат был бы null.
+   */
+  it('отклоняет родителя, который станет своим предком', () => {
+    const chain = [
+      { ...p('child', { gender: 'male' }), father_id: 'dad' },
+      p('dad', { gender: 'male' })
+    ] as Person[];
+
+    expect(validateParent(chain, 'dad', 'child', 'father')).toEqual({
+      field: 'father_id',
+      code: 'cycle'
+    });
+  });
 });
 
 describe('validatePersonFields', () => {
