@@ -1,0 +1,81 @@
+.ft-card {
+  box-sizing: border-box;
+  width: 220px;
+  min-height: var(--tap);
+  padding: var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.ft-card--M { border-left-color: var(--accent-male); }
+.ft-card--F { border-left-color: var(--accent-female); }
+
+.ft-card--main {
+  opacity: 1;
+  box-shadow: var(--shadow-2);
+  transform: scale(1.04);
+}
+
+.ft-card__top { display: flex; gap: var(--space-3); align-items: center; }
+
+.ft-card__avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: var(--font-2);
+  font-weight: 600;
+  color: #fff;
+}
+
+.ft-card--M .ft-card__avatar { background: var(--accent-male); }
+.ft-card--F .ft-card__avatar { background: var(--accent-female); }
+
+.ft-card__names { display: grid; min-width: 0; }
+
+.ft-card__first,
+.ft-card__last,
+.ft-card__years {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ft-card__first { font-size: var(--font-3); font-weight: 600; }
+.ft-card__last { font-size: var(--font-2); color: var(--fg); }
+.ft-card__years { font-size: var(--font-1); color: var(--muted); }
+
+.ft-card__bottom {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+  font-size: var(--font-1);
+  color: var(--muted);
+}
+
+.ft-card__counts { display: flex; gap: var(--space-3); }
+.ft-card__count { display: inline-flex; gap: 2px; align-items: baseline; }
+.ft-card__count b { font-weight: 600; color: var(--fg); }
+.ft-card__info { margin-left: auto; }
+
+.ft-card__todo {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: auto;
+}
+
+.ft-card__info + .ft-card__todo { margin-left: var(--space-2); }
