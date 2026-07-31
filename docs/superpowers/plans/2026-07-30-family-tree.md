@@ -2972,7 +2972,12 @@ export function renderCard(
     </span>
   </div>
   <div class="ft-card__bottom">
-    <span class="ft-card__counts">${counts.join('')}</span>
+    <!--
+      Обёртку рисуем только при непустых счётчиках. Строка "ft-card__counts"
+      содержит "ft-card__count" как подстроку, поэтому пустая обёртка ломала бы
+      проверку «у человека без родни нет разметки счётчиков».
+    -->
+    ${counts.length > 0 ? `<span class="ft-card__counts">${counts.join('')}</span>` : ''}
     ${person.about ? '<span class="ft-card__info">&#9432;</span>' : ''}
     ${incomplete ? '<span class="ft-card__todo"></span>' : ''}
   </div>
