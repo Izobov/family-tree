@@ -2044,7 +2044,7 @@ git commit -m "feat: маппер БД в формат family-chart с двус�
 
 **Files:**
 - Create: `src/lib/server/people.ts`
-- Test: проверяется через задачи 9–14 и e2e; юнит-логика уже покрыта задачей 6
+- Test: `src/lib/server/orphans.test.ts` — только для `orphansOf`; остальное проверяется через задачи 9–14 и e2e, а инварианты уже покрыты задачей 6
 
 **Interfaces:**
 - Consumes: `SupabaseClient`, `invariants.ts`, `to-family-chart.ts`
@@ -2309,18 +2309,81 @@ export async function deletePerson(
 }
 ```
 
-- [ ] **Step 2: Проверить типы**
+- [ ] **Step 2: Написать тест на `orphansOf`**
+
+Единственная чистая функция в этом файле, и она питает диалог подтверждения удаления.
+Ошибка здесь означает, что пользователь удаляет человека, видя неверный список тех, кто
+останется без родителя.
+
+`src/lib/server/orphans.test.ts`:
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { orphansOf } from './people';
+import type { PersonWithParents } from '$lib/tree/to-family-chart';
+
+function p(id: string, over: Partial<PersonWithParents> = {}): PersonWithParents {
+  return {
+    id,
+    tree_id: 't1',
+    first_name: id,
+    last_name: null,
+    gender: 'male',
+    birth_date: null,
+    died_on: null,
+    email: null,
+    phone: null,
+    telegram: null,
+    instagram: null,
+    about: null,
+    father_id: null,
+    mother_id: null,
+    ...over
+  } as PersonWithParents;
+}
+
+describe('orphansOf', () => {
+  const people = [
+    p('dad'),
+    p('mom', { gender: 'female' }),
+    p('byFather', { father_id: 'dad' }),
+    p('byMother', { mother_id: 'mom' }),
+    p('byBoth', { father_id: 'dad', mother_id: 'mom' }),
+    p('unrelated')
+  ];
+
+  it('находит детей по отцу', () => {
+    expect(orphansOf(people, 'dad').map((x) => x.id).sort()).toEqual(['byBoth', 'byFather']);
+  });
+
+  it('находит детей по матери', () => {
+    expect(orphansOf(people, 'mom').map((x) => x.id).sort()).toEqual(['byBoth', 'byMother']);
+  });
+
+  it('у бездетного человека никто не осиротеет', () => {
+    expect(orphansOf(people, 'unrelated')).toEqual([]);
+  });
+
+  it('не считает сиротами тех, у кого родитель просто не указан', () => {
+    // У 'unrelated' оба родителя null — он не должен попасть ни в один список.
+    expect(orphansOf(people, 'dad').some((x) => x.id === 'unrelated')).toBe(false);
+  });
+});
+```
+
+- [ ] **Step 3: Прогнать тест и проверить типы**
 
 ```bash
+npm run test:unit -- src/lib/server/orphans.test.ts
 npm run check
 ```
 
-Ожидается: 0 ошибок.
+Ожидается: 4 проверки PASS, 0 ошибок типов.
 
-- [ ] **Step 3: Коммит**
+- [ ] **Step 4: Коммит**
 
 ```bash
-git add src/lib/server/people.ts
+git add src/lib/server/people.ts src/lib/server/orphans.test.ts
 git commit -m "feat: слой доступа к people/spouses с применением инвариантов"
 ```
 
