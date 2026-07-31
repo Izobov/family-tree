@@ -1,6 +1,8 @@
 <script lang="ts">
   import { dict } from '$lib/i18n';
+  import { goto } from '$app/navigation';
   import PersonForm from '$lib/components/PersonForm.svelte';
+  import FamilyTree from '$lib/components/FamilyTree.svelte';
 
   let { data, form } = $props();
   let t = $derived(dict(data.locale));
@@ -21,7 +23,16 @@
     </form>
   </main>
 {:else}
-  <p>Дерево: {data.people.length}</p>
+  <div class="canvas">
+    <FamilyTree
+      people={data.people}
+      spouses={data.spouses}
+      rootId={data.tree.root_person_id}
+      {t}
+      locale={data.locale}
+      onOpen={(id) => goto(`/person/${id}`)}
+    />
+  </div>
 {/if}
 
 <style>
@@ -32,4 +43,9 @@
   }
   h1 { font-size: var(--font-5); margin: 0 0 var(--space-2); }
   p { color: var(--muted); margin: 0 0 var(--space-4); }
+
+  .canvas {
+    position: fixed;
+    inset: 0;
+  }
 </style>
