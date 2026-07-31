@@ -17,10 +17,20 @@ export const actions: Actions = {
       return fail(400, { errors: violationsToErrors(result.violations, t) });
     }
 
-    await locals.supabase
+    /**
+     * Человек уже создан, поэтому неудачу этого обновления не превращаем в
+     * ошибку формы: повторная отправка создала бы дубль. Но и молча глотать
+     * нельзя — без корня дерево откроется на произвольном человеке, и никто
+     * не узнает почему. Логируем на сервере, пользователю показываем успех.
+     */
+    const { error: rootError } = await locals.supabase
       .from('trees')
       .update({ root_person_id: result.id })
       .eq('id', tree.id);
+
+    if (rootError) {
+      console.error('root_person_id update failed:', rootError.message);
+    }
 
     return { created: result.id };
   }

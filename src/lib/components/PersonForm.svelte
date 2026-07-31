@@ -18,6 +18,14 @@
 </script>
 
 <div class="grid">
+  <!--
+    Общая ошибка. Слой данных возвращает нарушения с полем '_', когда падает
+    сама запись, а не валидация поля. Без этого блока такая ошибка не имела бы
+    места на экране: пользователь нажимал бы «Сохранить» и форма молча ничего
+    не делала бы — ни сообщения, ни перехода.
+  -->
+  {#if errors._}<p class="err err--form" role="alert">{errors._}</p>{/if}
+
   <label>
     {t.person.firstName}
     <input name="first_name" value={person?.first_name ?? ''} required />
@@ -111,4 +119,11 @@
   }
   legend { font-size: var(--font-1); color: var(--muted); padding: 0 var(--space-1); }
   .err { color: var(--danger); font-size: var(--font-1); }
+  .err--form {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-2);
+  }
 </style>
