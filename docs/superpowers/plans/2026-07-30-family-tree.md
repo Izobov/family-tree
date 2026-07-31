@@ -3074,7 +3074,7 @@ export function renderCard(
 npm run test:unit -- src/lib/tree/card.test.ts
 ```
 
-Ожидается: PASS (12 проверок).
+Ожидается: PASS (11 проверок: 3 на `initials`, 8 на `renderCard`).
 
 - [ ] **Step 6: Коммит**
 
