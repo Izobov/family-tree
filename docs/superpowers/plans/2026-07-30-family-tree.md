@@ -2093,15 +2093,16 @@ export async function loadTree(
   supabase: SupabaseClient,
   userId: string
 ): Promise<{ tree: Tree; people: PersonWithParents[]; spouses: Spouse[] } | null> {
-  const { data: tree } = await supabase
+  const { data: tree, error: treeError } = await supabase
     .from('trees')
     .select('id, owner_id, name, root_person_id')
     .eq('owner_id', userId)
     .maybeSingle();
 
+  if (treeError) throw new Error(`tree-read-failed: ${treeError.message}`);
   if (!tree) return null;
 
-  const [{ data: people }, { data: spouses }] = await Promise.all([
+  const [people, spouses] = await Promise.all([
     supabase.from('people').select(PERSON_COLUMNS).eq('tree_id', tree.id),
     supabase
       .from('spouses')
@@ -2109,10 +2110,20 @@ export async function loadTree(
       .eq('tree_id', tree.id)
   ]);
 
+  /**
+   * Ошибки чтения обязаны падать, а не превращаться в пустые списки. Пустой
+   * people при существующем дереве означал бы для задачи 9 «людей нет» — она
+   * показала бы онбординг «расскажите о себе» человеку с уже заполненным
+   * деревом, и отправка этой формы перезаписала бы root_person_id и создала
+   * дубль. Порча данных от одного сетевого сбоя.
+   */
+  if (people.error) throw new Error(`people-read-failed: ${people.error.message}`);
+  if (spouses.error) throw new Error(`spouses-read-failed: ${spouses.error.message}`);
+
   return {
     tree: tree as Tree,
-    people: (people ?? []) as PersonWithParents[],
-    spouses: (spouses ?? []) as Spouse[]
+    people: (people.data ?? []) as PersonWithParents[],
+    spouses: (spouses.data ?? []) as Spouse[]
   };
 }
 
