@@ -498,7 +498,15 @@ export const actions: Actions = {
 
   let { data, form } = $props();
   let t = $derived(dict(data.locale));
-  let editing = $derived(page.url.searchParams.get('edit') === '1');
+  /**
+   * `|| !!form?.errors` здесь не косметика. Нативный POST уходит на `?/update`
+   * и затирает query-строку, вместе с ней теряется `?edit=1`. Без этой части
+   * после fail(400) страница перерисовалась бы в режиме просмотра: данные
+   * не сохранены (верно), но пользователь не увидел бы ни ошибки, ни формы —
+   * нажал «Сохранить» и будто ничего не произошло.
+   * Работает и без JS, поэтому не требует use:enhance.
+   */
+  let editing = $derived(page.url.searchParams.get('edit') === '1' || !!form?.errors);
 </script>
 
 <main>
