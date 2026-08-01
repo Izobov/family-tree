@@ -15,12 +15,11 @@ import {
   mdiInstagram,
   mdiEmail,
   mdiClose,
-  mdiArrowUp,
-  mdiHeart,
-  mdiArrowDown,
+  mdiHumanMaleFemale,
+  mdiRing,
+  mdiHumanChild,
   mdiInformationOutline,
-  mdiCakeVariant,
-  mdiRing
+  mdiCakeVariant
 } from '@mdi/js';
 
 export const icons = {
@@ -32,9 +31,16 @@ export const icons = {
   instagram: mdiInstagram,
   email: mdiEmail,
   close: mdiClose,
-  parents: mdiArrowUp,
-  spouses: mdiHeart,
-  children: mdiArrowDown,
+  /**
+   * Родство: стрелки вверх/вниз и сердце пользователю ничего не сообщали —
+   * непонятно, что считает «стрелочка вверх 2». Берём предметные символы:
+   * двое взрослых, обручальное кольцо и ребёнок. Они различимы между собой
+   * даже на 14px и читаются без подписи. Сердце сознательно не используем:
+   * оно читается как «нравится», а не как «брак».
+   */
+  parents: mdiHumanMaleFemale,
+  spouses: mdiRing,
+  children: mdiHumanChild,
   about: mdiInformationOutline,
   birthday: mdiCakeVariant,
   anniversary: mdiRing
