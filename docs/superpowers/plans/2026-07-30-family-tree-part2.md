@@ -1954,9 +1954,8 @@ export const load: PageServerLoad = async ({ parent }) => {
             {#each group.events as event (event.subjectKey + event.date)}
               <li>
                 <a href={href(event)}>
-                  <span class="icon" aria-hidden="true">
-                    {event.kind === 'birthday' ? '🎂' : '💍'}
-                  </span>
+                  <!-- Иконка без label: рядом стоит видимый заголовок события. -->
+                  <Icon name={event.kind === 'birthday' ? 'birthday' : 'anniversary'} size={24} />
                   <span class="text">
                     <span class="title">{title(event)}</span>
                     <span class="sub">{subtitle(event)}</span>
