@@ -1,33 +1,35 @@
 <script lang="ts">
   import type { Dict } from '$lib/i18n';
   import type { Person } from '$lib/types';
+  import type { IconName } from '$lib/icons';
+  import Icon from './Icon.svelte';
 
   let { t, person }: { t: Dict; person: Person } = $props();
 
-  type Link = { href: string; label: string; icon: string };
+  type Link = { href: string; label: string; icon: IconName };
 
   let links = $derived.by((): Link[] => {
     const out: Link[] = [];
     if (person.phone) {
-      out.push({ href: `tel:${person.phone}`, label: t.person.phone, icon: '☎' });
+      out.push({ href: `tel:${person.phone}`, label: t.person.phone, icon: 'phone' });
       out.push({
         href: `https://wa.me/${person.phone.replace(/\D/g, '')}`,
         label: 'WhatsApp',
-        icon: '✆'
+        icon: 'whatsapp'
       });
     }
     if (person.telegram) {
-      out.push({ href: `https://t.me/${person.telegram}`, label: 'Telegram', icon: '✈' });
+      out.push({ href: `https://t.me/${person.telegram}`, label: 'Telegram', icon: 'telegram' });
     }
     if (person.instagram) {
       out.push({
         href: `https://instagram.com/${person.instagram}`,
         label: 'Instagram',
-        icon: '◎'
+        icon: 'instagram'
       });
     }
     if (person.email) {
-      out.push({ href: `mailto:${person.email}`, label: t.person.email, icon: '✉' });
+      out.push({ href: `mailto:${person.email}`, label: t.person.email, icon: 'email' });
     }
     return out;
   });
@@ -39,7 +41,9 @@
     <div class="row">
       {#each links as link (link.href)}
         <a href={link.href} rel="noreferrer noopener">
-          <span class="icon" aria-hidden="true">{link.icon}</span>
+          <!-- label не задаём: рядом стоит видимая подпись, иначе она
+               прочиталась бы скринридером дважды. -->
+          <Icon name={link.icon} size={20} />
           {link.label}
         </a>
       {/each}
@@ -63,5 +67,4 @@
     text-decoration: none;
     font-size: var(--font-2);
   }
-  .icon { font-size: var(--font-4); line-height: 1; }
 </style>

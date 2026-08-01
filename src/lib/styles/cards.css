@@ -82,3 +82,14 @@
 }
 
 .ft-card__info + .ft-card__todo { margin-left: var(--space-2); }
+
+/* Иконки MDI внутри карточки. Наследуют currentColor, поэтому отдельная
+   заливка не нужна — цвет задаёт родительский элемент. */
+.ft-card .ft-icon {
+  display: inline-block;
+  vertical-align: -2px;
+}
+
+.ft-card__count .ft-icon {
+  margin-right: 1px;
+}

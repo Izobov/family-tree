@@ -2,6 +2,7 @@ import type { Dict } from '$lib/i18n';
 import { formatYears } from '$lib/i18n';
 import type { Locale } from '$lib/types';
 import type { FcDatum } from './to-family-chart';
+import { svgIcon, type IconName } from '$lib/icons';
 
 /** Данные пользовательские, а вставляем сырым HTML — экранировать обязательно. */
 function esc(value: string): string {
@@ -31,16 +32,16 @@ export function renderCard(
   const incomplete = !person.birth_date || !person.about;
 
   const counts: string[] = [];
-  const push = (icon: string, n: number, label: string) => {
+  const push = (icon: IconName, n: number, label: string) => {
     if (n > 0) {
       counts.push(
-        `<span class="ft-card__count" title="${esc(label)}">${icon}<b>${n}</b></span>`
+        `<span class="ft-card__count" title="${esc(label)}">${svgIcon(icon)}<b>${n}</b></span>`
       );
     }
   };
-  push('↑', datum.rels.parents.length, t.person.parents);
-  push('♥', datum.rels.spouses.length, t.person.spouses);
-  push('↓', datum.rels.children.length, t.person.children);
+  push('parents', datum.rels.parents.length, t.person.parents);
+  push('spouses', datum.rels.spouses.length, t.person.spouses);
+  push('children', datum.rels.children.length, t.person.children);
 
   return `
 <div class="ft-card ${isMain ? 'ft-card--main' : ''} ft-card--${datum.data.gender}">
@@ -54,7 +55,7 @@ export function renderCard(
   </div>
   <div class="ft-card__bottom">
     ${counts.length > 0 ? `<span class="ft-card__counts">${counts.join('')}</span>` : ''}
-    ${person.about ? '<span class="ft-card__info">&#9432;</span>' : ''}
+    ${person.about ? `<span class="ft-card__info">${svgIcon('about')}</span>` : ''}
     ${incomplete ? '<span class="ft-card__todo"></span>' : ''}
   </div>
 </div>`.trim();

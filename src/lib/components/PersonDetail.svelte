@@ -5,6 +5,7 @@
   import type { PersonWithParents } from '$lib/tree/to-family-chart';
   import { initials } from '$lib/tree/card';
   import ContactRow from './ContactRow.svelte';
+  import Icon from './Icon.svelte';
 
   let {
     t,
@@ -43,7 +44,11 @@
 <article>
   <header>
     {#if onClose}
-      <button type="button" class="close" onclick={onClose} aria-label={t.person.close}>✕</button>
+      <button type="button" class="close" onclick={onClose}>
+        <!-- label задаём здесь: иконка — единственное содержимое кнопки,
+             без него скринридер прочитал бы её как безымянную. -->
+        <Icon name="close" size={20} label={t.person.close} />
+      </button>
     {/if}
     <span class="avatar avatar--{person.gender}">{initials(person)}</span>
     <h1>{fullName(person)}</h1>
