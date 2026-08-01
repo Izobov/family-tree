@@ -51,7 +51,14 @@ export const ru = {
     addChild: 'Ребёнка',
     marriedOn: 'Дата свадьбы',
     noData: 'Не указано',
-    ageYears: ['год', 'года', 'лет'] as [string, string, string]
+    ageYears: ['год', 'года', 'лет'] as [string, string, string],
+    secondParent: 'Второй родитель',
+    noSecondParent: 'Не указывать',
+    createNew: 'Создать нового',
+    pickExisting: 'Выбрать из существующих',
+    pickPerson: 'Кто это',
+    noCandidates: 'Некого выбрать',
+    link: 'Связать'
   },
   errors: {
     fatherMustBeMale: 'Отцом можно указать только мужчину',

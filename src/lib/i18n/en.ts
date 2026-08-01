@@ -53,7 +53,14 @@ export const en = {
     addChild: 'Child',
     marriedOn: 'Wedding date',
     noData: 'Not set',
-    ageYears: ['year', 'years', 'years'] as [string, string, string]
+    ageYears: ['year', 'years', 'years'] as [string, string, string],
+    secondParent: 'Second parent',
+    noSecondParent: 'Not specified',
+    createNew: 'Create new',
+    pickExisting: 'Pick existing',
+    pickPerson: 'Which person',
+    noCandidates: 'Nobody to pick',
+    link: 'Link'
   },
   errors: {
     fatherMustBeMale: 'Only a male person can be a father',
