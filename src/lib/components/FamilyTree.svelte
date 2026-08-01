@@ -27,8 +27,16 @@
   } = $props();
 
   let host: HTMLDivElement;
+  /**
+   * Именно $state, а не обычный let. В рунах обычная переменная не реактивна,
+   * и цепочка ломается так: динамический import всегда резолвится позже, поэтому
+   * $effect отрабатывает первый раз при chart === null, выходит по раннему
+   * возврату и не успевает прочитать graph — то есть не подписывается ни на что.
+   * Эффект без зависимостей больше не перезапускается никогда, и диаграмма,
+   * отрисовавшись один раз, перестаёт реагировать на правки навсегда.
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let chart: any = null;
+  let chart = $state<any>(null);
 
   let graph = $derived(toFamilyChart(people, spouses));
 
