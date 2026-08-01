@@ -95,7 +95,7 @@
 
   <section class="actions">
     <a class="btn" href="/person/{person.id}?edit=1">{t.person.edit}</a>
-    <a class="btn" href="/person/{person.id}?add=1">{t.person.addRelative}</a>
+    <a class="btn" href="/person/{person.id}/add">{t.person.addRelative}</a>
     {#if onShowInTree}
       <button type="button" onclick={() => onShowInTree(person.id)}>{t.person.showInTree}</button>
     {/if}
