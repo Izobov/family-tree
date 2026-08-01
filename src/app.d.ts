@@ -15,7 +15,15 @@ declare global {
 			userId: string | null;
 			locale: Locale;
 		}
-		// interface PageState {}
+		interface PageState {
+			personDetail?: {
+				person: import('$lib/tree/to-family-chart').PersonWithParents;
+				parents: import('$lib/tree/to-family-chart').PersonWithParents[];
+				spouses: import('$lib/tree/to-family-chart').PersonWithParents[];
+				children: import('$lib/tree/to-family-chart').PersonWithParents[];
+				siblings: import('$lib/tree/to-family-chart').PersonWithParents[];
+			};
+		}
 		// interface Platform {}
 	}
 }

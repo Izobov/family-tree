@@ -1,12 +1,29 @@
 <script lang="ts">
   import { dict } from '$lib/i18n';
-  import { goto } from '$app/navigation';
+  import { goto, preloadData, pushState } from '$app/navigation';
+  import { page } from '$app/state';
   import PersonForm from '$lib/components/PersonForm.svelte';
   import FamilyTree from '$lib/components/FamilyTree.svelte';
+  import PersonDetail from '$lib/components/PersonDetail.svelte';
 
   let { data, form } = $props();
   let t = $derived(dict(data.locale));
   let isEmpty = $derived(data.people.length === 0);
+
+  /**
+   * Оверлей вместо навигации: дерево остаётся смонтированным, зум и фокус
+   * не слетают, а кнопка «назад» на Android закрывает панель, а не приложение.
+   * Если предзагрузка не удалась — обычный переход как фоллбэк.
+   */
+  async function openPerson(id: string) {
+    const href = `/person/${id}`;
+    const result = await preloadData(href);
+    if (result.type === 'loaded' && result.status === 200) {
+      pushState(href, { personDetail: result.data as App.PageState['personDetail'] });
+    } else {
+      goto(href);
+    }
+  }
 </script>
 
 {#if isEmpty}
@@ -30,7 +47,24 @@
       rootId={data.tree.root_person_id}
       {t}
       locale={data.locale}
-      onOpen={(id) => goto(`/person/${id}`)}
+      onOpen={openPerson}
+    />
+  </div>
+{/if}
+
+{#if page.state.personDetail}
+  {@const d = page.state.personDetail}
+  <div class="overlay">
+    <PersonDetail
+      {t}
+      locale={data.locale}
+      person={d.person}
+      parents={d.parents}
+      spouses={d.spouses}
+      children={d.children}
+      siblings={d.siblings}
+      onClose={() => history.back()}
+      onShowInTree={() => history.back()}
     />
   </div>
 {/if}
@@ -47,5 +81,19 @@
   .canvas {
     position: fixed;
     inset: 0;
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    overflow-y: auto;
+    background: var(--bg);
+    animation: slide 0.2s ease-out;
+  }
+
+  @keyframes slide {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: none; opacity: 1; }
   }
 </style>
