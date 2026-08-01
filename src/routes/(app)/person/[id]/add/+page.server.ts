@@ -110,7 +110,32 @@ export const actions: Actions = {
           await rollback();
           error(400, 'bad-second-parent');
         }
+        const parentKind = anchor.gender === 'male' ? 'father' : 'mother';
         const secondKind = second.gender === 'male' ? 'father' : 'mother';
+
+        /**
+         * Оба родителя не могут занимать одну колонку. Инварианты это не
+         * ловят: validateParent проверяет «подходит ли пол человека под
+         * роль», а не «занята ли уже эта роль кем-то другим» — при одинаковом
+         * поле якоря и второго родителя второй setParent молча перезаписал
+         * бы связь с якорем вместо того, чтобы её дополнить.
+         */
+        if (secondKind === parentKind) {
+          await rollback();
+          return fail(400, {
+            kind,
+            errors: violationsToErrors(
+              [
+                {
+                  field: 'second_parent_id',
+                  code: secondKind === 'father' ? 'motherMustBeFemale' : 'fatherMustBeMale'
+                }
+              ],
+              t
+            )
+          });
+        }
+
         const secondLink = await setParent(
           locals.supabase,
           tree.id,

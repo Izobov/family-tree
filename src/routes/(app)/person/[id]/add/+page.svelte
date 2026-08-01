@@ -93,6 +93,7 @@
                 <option value={sp.id} selected={sp.id === secondParentId}>{nameOf(sp)}</option>
               {/each}
             </select>
+            {#if form?.errors?.second_parent_id}<span class="err">{form.errors.second_parent_id}</span>{/if}
           </label>
         {/if}
       </form>
