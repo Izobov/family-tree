@@ -77,3 +77,16 @@ describe('formatYears', () => {
     expect(formatYears(null, '2011-06-01', 'ru', today)).toBe('† 2011');
   });
 });
+
+describe('formatYears — дата рождения в будущем', () => {
+  const today = new Date('2026-07-30T00:00:00Z');
+
+  it('не показывает отрицательный возраст, только год', () => {
+    expect(formatYears('2030-01-01', null, 'ru', today)).toBe('2030');
+    expect(formatYears('2030-01-01', null, 'en', today)).toBe('2030');
+  });
+
+  it('нулевой возраст остаётся допустимым', () => {
+    expect(formatYears('2026-01-01', null, 'ru', today)).toBe('2026 — 0 лет');
+  });
+});

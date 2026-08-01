@@ -14,15 +14,22 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow-1);
   cursor: pointer;
-  opacity: 0.75;
-  transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+  /* Прозрачности здесь быть не должно: карточки лежат поверх линий связей, и
+     полупрозрачная карточка просвечивает — линия видна прямо сквозь человека.
+     Невыделенные карточки приглушаем цветом текста, а не opacity. */
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .ft-card--M { border-left-color: var(--accent-male); }
 .ft-card--F { border-left-color: var(--accent-female); }
 
+/* Карточка вне фокуса: та же плотность фона, приглушённее только текст. */
+.ft-card:not(.ft-card--main) .ft-card__first,
+.ft-card:not(.ft-card--main) .ft-card__last {
+  color: var(--muted);
+}
+
 .ft-card--main {
-  opacity: 1;
   box-shadow: var(--shadow-2);
   transform: scale(1.04);
 }
@@ -92,4 +99,31 @@
 
 .ft-card__count .ft-icon {
   margin-right: 1px;
+}
+
+/* family-chart написана под тёмную тему: в её CSS --background-color rgb(33,33,33),
+   --text-color #fff, а связям она проставляет stroke="#fff" презентационным
+   атрибутом прямо в d3 (family-chart.js, linkEnter). На нашем светлом фоне это
+   белое по белому — связей не видно вообще.
+
+   Презентационный атрибут слабее любого CSS-правила, поэтому !important не нужен.
+   Толщину поднимаем с 1px: на светлом фоне волосяная линия почти не читается. */
+.f3 .link {
+  stroke: var(--tree-link);
+  stroke-width: 1.5px;
+}
+
+/* Подписи на линиях (год свадьбы) рисуются как SVG-текст с fill: currentColor,
+   поэтому цвет им задаёт контейнер. Без этого они наследовали бы цвет от body
+   и на тёмной теме сливались бы с фоном. Карточек не касается: у .ft-card
+   собственный color. */
+.f3 {
+  color: var(--muted);
+}
+
+/* Год свадьбы на линии между супругами. Библиотека рисует его SVG-текстом с
+   fill: #fff (та же тёмная тема), перебивая собственное правило fill: currentColor,
+   поэтому одного color на контейнере мало — нужен явный fill. */
+.f3 .link-text text {
+  fill: var(--muted);
 }

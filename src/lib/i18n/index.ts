@@ -59,6 +59,14 @@ export function formatYears(
   if (birth && died) return `${birth.slice(0, 4)}–${died.slice(0, 4)}`;
 
   const age = yearsBetween(birth!, today);
+
+  /**
+   * Дата рождения в будущем — почти всегда опечатка, но показывать «-1 год»
+   * нельзя: это выглядит как поломка приложения, а не как ошибка ввода.
+   * Показываем только год, возраст опускаем.
+   */
+  if (age < 0) return birth!.slice(0, 4);
+
   const unit =
     locale === 'ru'
       ? plural(age, dict('ru').person.ageYears)
