@@ -44,6 +44,7 @@ export const en = {
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete',
+    close: 'Close',
     showInTree: 'Show in tree',
     addRelative: 'Add relative',
     addFather: 'Father',

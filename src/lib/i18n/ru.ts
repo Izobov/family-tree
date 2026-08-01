@@ -42,6 +42,7 @@ export const ru = {
     save: 'Сохранить',
     cancel: 'Отмена',
     delete: 'Удалить',
+    close: 'Закрыть',
     showInTree: 'Показать в дереве',
     addRelative: 'Добавить родственника',
     addFather: 'Отца',

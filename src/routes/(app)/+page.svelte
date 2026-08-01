@@ -11,6 +11,18 @@
   let isEmpty = $derived(data.people.length === 0);
 
   /**
+   * Оверлей появляется без смены фокуса, поэтому без этого пользователь
+   * скринридера не узнаёт, что панель открылась, и не может в неё
+   * перетабаться. role="dialog" ставим только здесь: на самостоятельном
+   * маршруте /person/[id] это обычная страница, а не диалог.
+   */
+  let overlayEl = $state<HTMLDivElement | null>(null);
+
+  $effect(() => {
+    overlayEl?.focus();
+  });
+
+  /**
    * Оверлей вместо навигации: дерево остаётся смонтированным, зум и фокус
    * не слетают, а кнопка «назад» на Android закрывает панель, а не приложение.
    * Если предзагрузка не удалась — обычный переход как фоллбэк.
@@ -54,7 +66,16 @@
 
 {#if page.state.personDetail}
   {@const d = page.state.personDetail}
-  <div class="overlay">
+  <div
+    class="overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label={d.person.last_name
+      ? `${d.person.first_name} ${d.person.last_name}`
+      : d.person.first_name}
+    tabindex="-1"
+    bind:this={overlayEl}
+  >
     <PersonDetail
       {t}
       locale={data.locale}

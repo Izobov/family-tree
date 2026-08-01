@@ -43,7 +43,7 @@
 <article>
   <header>
     {#if onClose}
-      <button type="button" class="close" onclick={onClose} aria-label={t.person.cancel}>✕</button>
+      <button type="button" class="close" onclick={onClose} aria-label={t.person.close}>✕</button>
     {/if}
     <span class="avatar avatar--{person.gender}">{initials(person)}</span>
     <h1>{fullName(person)}</h1>
