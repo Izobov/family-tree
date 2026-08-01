@@ -1915,6 +1915,7 @@ export const load: PageServerLoad = async ({ parent }) => {
 ```svelte
 <script lang="ts">
   import { dict, formatDate } from '$lib/i18n';
+  import Icon from '$lib/components/Icon.svelte';
   import type { FamilyEvent } from '$lib/events/upcoming';
 
   let { data } = $props();
