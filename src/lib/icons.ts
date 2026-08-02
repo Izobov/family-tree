@@ -17,7 +17,7 @@ import {
   mdiClose,
   mdiHumanMaleFemale,
   mdiRing,
-  mdiHumanChild,
+  mdiAccountChild,
   mdiInformationOutline,
   mdiCakeVariant,
   mdiArrowLeft,
@@ -44,7 +44,7 @@ export const icons = {
    */
   parents: mdiHumanMaleFemale,
   spouses: mdiRing,
-  children: mdiHumanChild,
+  children: mdiAccountChild,
   about: mdiInformationOutline,
   birthday: mdiCakeVariant,
   anniversary: mdiRing,

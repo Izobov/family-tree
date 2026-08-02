@@ -74,28 +74,43 @@
       </a>
     </div>
 
+{#snippet kindExtras()}
+  {#if kind === 'spouse'}
+    <label class="married">
+      {t.person.marriedOn}
+      <input type="date" name="married_on" />
+    </label>
+  {/if}
+  {#if kind === 'child' && data.spouseCandidates.length > 0}
+    <label class="second-parent">
+      {t.person.secondParent}
+      <select name="second_parent_id">
+        <option value="" selected={secondParentId === ''}>{t.person.noSecondParent}</option>
+        {#each data.spouseCandidates as sp (sp.id)}
+          <option value={sp.id} selected={sp.id === secondParentId}>{nameOf(sp)}</option>
+        {/each}
+      </select>
+      {#if form?.errors?.second_parent_id}<span class="err">{form.errors.second_parent_id}</span>{/if}
+    </label>
+  {/if}
+{/snippet}
+
     {#if mode === 'create'}
       <form method="POST" action="?/create">
         <input type="hidden" name="kind" value={kind} />
-        <PersonForm {t} errors={form?.errors ?? {}} submitLabel={t.person.save} showDeath={true} />
-        {#if kind === 'spouse'}
-          <label class="married">
-            {t.person.marriedOn}
-            <input type="date" name="married_on" />
-          </label>
-        {/if}
-        {#if kind === 'child' && data.spouseCandidates.length > 0}
-          <label class="second-parent">
-            {t.person.secondParent}
-            <select name="second_parent_id">
-              <option value="" selected={secondParentId === ''}>{t.person.noSecondParent}</option>
-              {#each data.spouseCandidates as sp (sp.id)}
-                <option value={sp.id} selected={sp.id === secondParentId}>{nameOf(sp)}</option>
-              {/each}
-            </select>
-            {#if form?.errors?.second_parent_id}<span class="err">{form.errors.second_parent_id}</span>{/if}
-          </label>
-        {/if}
+        <!--
+          Дата свадьбы и второй родитель передаются сниппетом, а не ставятся
+          после <PersonForm>: кнопка «Сохранить» живёт внутри компонента,
+          поэтому снаружи эти поля оказывались под ней и читались как не
+          относящиеся к форме.
+        -->
+        <PersonForm
+          {t}
+          errors={form?.errors ?? {}}
+          submitLabel={t.person.save}
+          showDeath={true}
+          extraFields={kindExtras}
+        />
       </form>
     {:else}
       <form method="POST" action="?/link">

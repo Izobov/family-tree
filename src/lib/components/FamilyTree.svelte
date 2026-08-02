@@ -57,7 +57,12 @@
     chart = f3
       .createChart(host, structuredClone(graph))
       .setOrientationVertical()
-      .setCardXSpacing(250)
+      /**
+       * 300 при ширине карточки 220 даёт 80px просвета. При прежних 250 просвет
+       * был 30px, и год свадьбы — библиотека рисует его ровно посередине между
+       * супругами — физически не помещался между карточками.
+       */
+      .setCardXSpacing(300)
       .setCardYSpacing(160)
       .setShowSiblingsOfMain(true)
       .setSingleParentEmptyCard(false)
@@ -89,6 +94,21 @@
         if (d.data.id === chart.getMainDatum().id) onOpen(d.data.id);
         else onRecenter(d.data.id);
       });
+
+    /**
+     * Линия между супругами визуально не отличалась от линий «родитель —
+     * ребёнок», поэтому пара не читалась как пара. В данных связи флаг
+     * `spouse: true` есть, но класс по нему библиотека не вешает — вешаем сами
+     * после каждой перерисовки. Данные d3 лежат в __data__ на самом элементе,
+     * так что импортировать d3 ради этого не нужно.
+     */
+    chart.setAfterUpdate(() => {
+      host.querySelectorAll('.links_view .link').forEach((el) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const datum = (el as any).__data__;
+        el.classList.toggle('link--spouse', !!datum?.spouse);
+      });
+    });
 
     const initialId = focusId ?? rootId;
     if (initialId) chart.updateMainId(initialId);

@@ -2,18 +2,28 @@
   import type { Dict } from '$lib/i18n';
   import type { PersonWithParents } from '$lib/tree/to-family-chart';
 
+  import type { Snippet } from 'svelte';
+
   let {
     t,
     person = null,
     errors = {},
     submitLabel,
-    showDeath = true
+    showDeath = true,
+    extraFields
   }: {
     t: Dict;
     person?: PersonWithParents | null;
     errors?: Record<string, string>;
     submitLabel: string;
     showDeath?: boolean;
+    /**
+     * Дополнительные поля конкретного экрана — например дата свадьбы при
+     * добавлении супруга. Рисуются ВНУТРИ формы и до кнопки: если добавлять
+     * их снаружи, поле оказывается под «Сохранить» и выглядит не относящимся
+     * к форме.
+     */
+    extraFields?: Snippet;
   } = $props();
 </script>
 
@@ -93,6 +103,8 @@
     <input name="instagram" placeholder="username" value={person?.instagram ?? ''} />
     {#if errors.instagram}<span class="err">{errors.instagram}</span>{/if}
   </label>
+
+  {#if extraFields}{@render extraFields()}{/if}
 
   <button type="submit">{submitLabel}</button>
 </div>
