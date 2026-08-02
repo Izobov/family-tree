@@ -19,7 +19,11 @@ import {
   mdiRing,
   mdiHumanChild,
   mdiInformationOutline,
-  mdiCakeVariant
+  mdiCakeVariant,
+  mdiArrowLeft,
+  mdiMagnify,
+  mdiAccountGroup,
+  mdiAccountCircle
 } from '@mdi/js';
 
 export const icons = {
@@ -43,7 +47,16 @@ export const icons = {
   children: mdiHumanChild,
   about: mdiInformationOutline,
   birthday: mdiCakeVariant,
-  anniversary: mdiRing
+  anniversary: mdiRing,
+  /**
+   * Нижняя панель навигации. Четыре разных предметных символа — стрелка,
+   * лупа, группа людей, один человек в круге — различимы между собой на
+   * 24px и читаются без подписи, хотя подпись всё равно есть под каждой.
+   */
+  back: mdiArrowLeft,
+  search: mdiMagnify,
+  people: mdiAccountGroup,
+  me: mdiAccountCircle
 } as const;
 
 export type IconName = keyof typeof icons;

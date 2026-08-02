@@ -1,0 +1,80 @@
+<script lang="ts">
+  import type { Dict } from '$lib/i18n';
+  import Icon from './Icon.svelte';
+
+  let {
+    t,
+    canGoBack,
+    onBack,
+    onSearch,
+    onEveryone,
+    onMe
+  }: {
+    t: Dict;
+    /** «Назад» неактивна, если возвращаться некуда — см. вычисление в +page.svelte. */
+    canGoBack: boolean;
+    onBack: () => void;
+    onSearch: () => void;
+    onEveryone: () => void;
+    onMe: () => void;
+  } = $props();
+</script>
+
+<nav class="bar">
+  <button type="button" disabled={!canGoBack} onclick={onBack}>
+    <Icon name="back" size={24} />
+    <span>{t.nav.back}</span>
+  </button>
+  <button type="button" onclick={onSearch}>
+    <Icon name="search" size={24} />
+    <span>{t.nav.search}</span>
+  </button>
+  <button type="button" onclick={onEveryone}>
+    <Icon name="people" size={24} />
+    <span>{t.nav.everyone}</span>
+  </button>
+  <button type="button" onclick={onMe}>
+    <Icon name="me" size={24} />
+    <span>{t.nav.me}</span>
+  </button>
+</nav>
+
+<style>
+  .bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    /* Токен из tokens.css — тот же, что вычитает .canvas в +page.svelte,
+       иначе панель и холст разойдутся во мнении, где кончается дерево. */
+    height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: var(--shadow-1);
+  }
+
+  button {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: var(--tap);
+    padding: var(--space-1);
+    border: none;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+  }
+  button:disabled {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+  button span {
+    font-size: var(--font-1);
+  }
+</style>

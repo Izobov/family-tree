@@ -23,6 +23,14 @@ declare global {
 				children: import('$lib/tree/to-family-chart').PersonWithParents[];
 				siblings: import('$lib/tree/to-family-chart').PersonWithParents[];
 			};
+			/**
+			 * Кто в фокусе дерева. Перецентрировка идёт через history.pushState,
+			 * а не напрямую в family-chart, поэтому «назад» её отменяет. Независим от
+			 * personDetail: открытие оверлея переносит текущий focusId в свою
+			 * запись истории, иначе дерево визуально откатилось бы к корню, пока
+			 * оверлей ещё открыт.
+			 */
+			focusId?: string | null;
 		}
 		// interface Platform {}
 	}

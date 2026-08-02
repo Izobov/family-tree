@@ -30,6 +30,10 @@
   --font-4: 20px;
   --font-5: 28px;
   --tap: 44px;
+  /* Высота нижней панели без safe-area: BottomNav и .canvas в +page.svelte
+     оба читают этот токен, чтобы холст дерева и сама панель были в одном
+     мнении о том, где заканчивается дерево и начинается панель. */
+  --bottom-nav-h: 64px;
 }
 
 @media (prefers-color-scheme: dark) {

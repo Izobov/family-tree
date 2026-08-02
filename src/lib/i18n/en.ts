@@ -2,7 +2,16 @@ import type { ru } from './ru';
 
 export const en = {
   app: { name: 'Family Tree', myTree: 'My tree' },
-  nav: { tree: 'Tree', events: 'Events', settings: 'Settings', signOut: 'Sign out' },
+  nav: {
+    tree: 'Tree',
+    events: 'Events',
+    settings: 'Settings',
+    signOut: 'Sign out',
+    back: 'Back',
+    search: 'Search',
+    everyone: 'Everyone',
+    me: 'Me'
+  },
   auth: {
     signInTitle: 'Sign in',
     signUpTitle: 'Sign up',
@@ -105,5 +114,11 @@ export const en = {
     iosHint: 'Notifications only work for an app installed on the home screen: open Share and pick "Add to Home Screen".',
     unsupported: 'This browser does not support notifications'
   },
-  offline: { banner: 'No connection. The tree is view-only.' }
+  offline: { banner: 'No connection. The tree is view-only.' },
+  people: {
+    title: 'Everyone',
+    searchPlaceholder: 'First or last name',
+    nothingFound: 'Nobody found',
+    count: 'Total'
+  }
 } satisfies typeof ru;

@@ -14,16 +14,27 @@
     people,
     spouses,
     rootId,
+    focusId,
     t,
     locale,
-    onOpen
+    onOpen,
+    onRecenter
   }: {
     people: PersonWithParents[];
     spouses: Spouse[];
     rootId: string | null;
+    /**
+     * Кто сейчас в фокусе — приходит из page.state.focusId в родителе, а не
+     * решается здесь. Перецентрировка идёт через историю браузера (см.
+     * onRecenter), поэтому «что показать» и «куда переключиться» разведены:
+     * FamilyTree только слушается focusId и никогда не решает сам.
+     */
+    focusId: string | null;
     t: Dict;
     locale: Locale;
     onOpen: (id: string) => void;
+    /** Тап по чужой (не главной) карточке — раньше сразу дёргал family-chart. */
+    onRecenter: (id: string) => void;
   } = $props();
 
   let host: HTMLDivElement;
@@ -72,12 +83,15 @@
       .setCardDim({ w: 220, h: 96 })
       .setMiniTree(false)
       // Вариант A: чужая карточка перецентрирует, карточка в фокусе раскрывается.
-      .setOnCardClick((e: MouseEvent, d: any) => {
+      // Перецентрировку отдаём наружу вместо card.onCardClickDefault — родитель
+      // превращает её в pushState, чтобы «назад» могло её отменить.
+      .setOnCardClick((_e: MouseEvent, d: any) => {
         if (d.data.id === chart.getMainDatum().id) onOpen(d.data.id);
-        else card.onCardClickDefault(e, d);
+        else onRecenter(d.data.id);
       });
 
-    if (rootId) chart.updateMainId(rootId);
+    const initialId = focusId ?? rootId;
+    if (initialId) chart.updateMainId(initialId);
     chart.updateTree({ initial: true, tree_position: 'main_to_middle' });
   });
 
@@ -110,6 +124,24 @@
     if (!chart) return;
     chart.updateData(structuredClone(graph));
     chart.updateTree({ tree_position: 'inherit' });
+  });
+
+  /**
+   * Реакция на смену focusId, пришедшую снаружи (кнопка «Я», выбор из
+   * PeopleSheet, нажатие «назад» — всё это меняет page.state.focusId у
+   * родителя, а сюда долетает уже как проп). updateMainId сам по себе не
+   * перерисовывает вид — проверено в браузере: без updateTree карточка
+   * меняется внутри chart, но дерево на экране не сдвигается. Поэтому
+   * следом обязателен updateTree({ tree_position: 'main_to_middle' }).
+   * Сравнение с текущим getMainDatum() нужно, чтобы не запускать лишний
+   * transition при первом рендере — main уже выставлен на нужного человека
+   * в onMount.
+   */
+  $effect(() => {
+    if (!chart || !focusId) return;
+    if (chart.getMainDatum()?.id === focusId) return;
+    chart.updateMainId(focusId);
+    chart.updateTree({ tree_position: 'main_to_middle' });
   });
 </script>
 
