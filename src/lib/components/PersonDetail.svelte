@@ -99,7 +99,7 @@
     {#if onShowInTree}
       <button type="button" onclick={() => onShowInTree(person.id)}>{t.person.showInTree}</button>
     {/if}
-    <a class="btn btn--danger" href="/person/{person.id}?delete=1">{t.person.delete}</a>
+    <a class="btn btn--danger" href="/person/{person.id}/delete">{t.person.delete}</a>
   </section>
 </article>
 
