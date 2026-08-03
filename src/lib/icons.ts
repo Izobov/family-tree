@@ -23,7 +23,8 @@ import {
   mdiArrowLeft,
   mdiMagnify,
   mdiAccountGroup,
-  mdiAccountCircle
+  mdiAccountCircle,
+  mdiLogout
 } from '@mdi/js';
 
 export const icons = {
@@ -56,7 +57,10 @@ export const icons = {
   back: mdiArrowLeft,
   search: mdiMagnify,
   people: mdiAccountGroup,
-  me: mdiAccountCircle
+  me: mdiAccountCircle,
+  // Хедер: кнопка выхода из аккаунта — только иконка, подпись даём через
+  // aria-label, чтобы хедер оставался компактным на телефоне.
+  signOut: mdiLogout
 } as const;
 
 export type IconName = keyof typeof icons;

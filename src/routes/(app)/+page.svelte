@@ -5,8 +5,6 @@
   import PersonForm from '$lib/components/PersonForm.svelte';
   import FamilyTree from '$lib/components/FamilyTree.svelte';
   import PersonDetail from '$lib/components/PersonDetail.svelte';
-  import BottomNav from '$lib/components/BottomNav.svelte';
-  import PeopleSheet from '$lib/components/PeopleSheet.svelte';
 
   let { data, form } = $props();
   let t = $derived(dict(data.locale));
@@ -18,13 +16,6 @@
    * откатиться за неё, и остаётся фоллбэк на корень дерева.
    */
   let focusId = $derived(page.state.focusId ?? data.tree.root_person_id);
-
-  /**
-   * «Назад» неактивна, если в текущей записи истории нет ни фокуса, ни
-   * оверлея: значит, это базовый вид, откатывать больше некуда в рамках
-   * приложения (что было до него — уже не наша навигация).
-   */
-  let canGoBack = $derived(!!page.state.personDetail || !!page.state.focusId);
 
   /**
    * Оверлей появляется без смены фокуса, поэтому без этого пользователь
@@ -70,21 +61,6 @@
       goto(href);
     }
   }
-
-  let sheetMode = $state<'search' | 'all' | null>(null);
-
-  function closeSheet() {
-    sheetMode = null;
-  }
-
-  function selectFromSheet(id: string) {
-    sheetMode = null;
-    recenter(id);
-  }
-
-  function focusOnRoot() {
-    if (data.tree.root_person_id) recenter(data.tree.root_person_id);
-  }
 </script>
 
 {#if isEmpty}
@@ -113,26 +89,6 @@
       onRecenter={recenter}
     />
   </div>
-
-  <BottomNav
-    {t}
-    {canGoBack}
-    onBack={() => history.back()}
-    onSearch={() => (sheetMode = 'search')}
-    onEveryone={() => (sheetMode = 'all')}
-    onMe={focusOnRoot}
-  />
-{/if}
-
-{#if sheetMode}
-  <PeopleSheet
-    {t}
-    locale={data.locale}
-    people={data.people}
-    mode={sheetMode}
-    onClose={closeSheet}
-    onSelect={selectFromSheet}
-  />
 {/if}
 
 {#if page.state.personDetail}
@@ -172,9 +128,12 @@
 
   .canvas {
     position: fixed;
-    /* Снизу вычитаем нижнюю панель — без этого низ дерева уезжает под неё
-       и остаётся недостижимым для пальца. */
-    inset: 0 0 calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)) 0;
+    /* Сверху вычитаем хедер (sticky, но .canvas — fixed и не участвует в
+       потоке, поэтому не подвинется под него сам). Снизу — нижнюю панель:
+       без этого низ дерева уезжает под неё и остаётся недостижимым для
+       пальца. Те же токены читает и BottomNav, и хедер в layout — три места
+       не могут разойтись во мнении, где кончается дерево. */
+    inset: var(--header-h) 0 calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)) 0;
   }
 
   .overlay {
