@@ -71,8 +71,14 @@ test('регистрация, построение дерева, правка, �
 
   await page.goto('/');
   await expect(page.locator('.ft-card')).toHaveCount(2);
-  await page.getByRole('button', { name: 'Все' }).click();
+  // Поиск с пустой строкой показывает всех — отдельной кнопки «Все» больше нет.
+  await page.getByRole('button', { name: 'Поиск' }).click();
   await expect(page.getByText('Сергей Волков')).toBeVisible();
+
+  // Настройки: язык переключается отсюда.
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: 'Настройки' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'RU' })).toBeVisible();
 
   await page.goto('/');
 

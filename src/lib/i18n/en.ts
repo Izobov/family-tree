@@ -128,6 +128,7 @@ export const en = {
   settings: {
     title: 'Settings',
     language: 'Language',
+    languageHint: 'Defaults to your system language.',
     notifications: 'Notifications',
     enablePush: 'Enable notifications',
     disablePush: 'Disable notifications',

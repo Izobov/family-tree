@@ -9,8 +9,8 @@
     onBack,
     onSearch,
     onAdd,
-    onEveryone,
-    onMe
+    onMe,
+    onSettings
   }: {
     t: Dict;
     /** «Назад» неактивна, если возвращаться некуда — см. вычисление в +page.svelte. */
@@ -18,8 +18,8 @@
     onBack: () => void;
     onSearch: () => void;
     onAdd: () => void;
-    onEveryone: () => void;
     onMe: () => void;
+    onSettings: () => void;
   } = $props();
 
   /**
@@ -55,13 +55,18 @@
     <Icon name="add" size={24} />
     <span>{t.nav.add}</span>
   </button>
-  <button type="button" onclick={tap(onEveryone)}>
-    <Icon name="people" size={24} />
-    <span>{t.nav.everyone}</span>
-  </button>
   <button type="button" onclick={tap(onMe)}>
     <Icon name="me" size={24} />
     <span>{t.nav.me}</span>
+  </button>
+  <!--
+    «Все» отсюда убрана: она открывала тот же список, что и поиск, то есть
+    дублировала соседнюю кнопку. Нарисовать всех разом диаграмма всё равно не
+    может — family-chart строит вид от одного человека, а не граф целиком.
+  -->
+  <button type="button" onclick={tap(onSettings)}>
+    <Icon name="settings" size={24} />
+    <span>{t.nav.settings}</span>
   </button>
 </nav>
 

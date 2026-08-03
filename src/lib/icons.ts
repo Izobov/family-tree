@@ -22,10 +22,10 @@ import {
   mdiCakeVariant,
   mdiArrowLeft,
   mdiMagnify,
-  mdiAccountGroup,
   mdiAccountCircle,
   mdiLogout,
-  mdiPlus
+  mdiPlus,
+  mdiCog
 } from '@mdi/js';
 
 export const icons = {
@@ -51,14 +51,14 @@ export const icons = {
   birthday: mdiCakeVariant,
   anniversary: mdiRing,
   /**
-   * Нижняя панель навигации. Четыре разных предметных символа — стрелка,
-   * лупа, группа людей, один человек в круге — различимы между собой на
-   * 24px и читаются без подписи, хотя подпись всё равно есть под каждой.
+   * Нижняя панель навигации. Разные предметные символы — стрелка, лупа,
+   * человек в круге, шестерня — различимы между собой на 24px и читаются
+   * без подписи, хотя подпись всё равно есть под каждой.
    */
   back: mdiArrowLeft,
   search: mdiMagnify,
-  people: mdiAccountGroup,
   me: mdiAccountCircle,
+  settings: mdiCog,
   // Быстрое создание человека. Плюс — единственный символ, который на нижней
   // панели читается как «добавить» без подписи, поэтому берём именно его, а не
   // «человек с плюсом»: на 24px тот превращается в кашу.

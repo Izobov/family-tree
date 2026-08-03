@@ -37,10 +37,10 @@
     }
   }
 
-  let sheetMode = $state<'search' | 'all' | null>(null);
+  let searchOpen = $state(false);
 
   function closeSheet() {
-    sheetMode = null;
+    searchOpen = false;
   }
 
   /**
@@ -50,7 +50,7 @@
    * бы обновить через pushState.
    */
   function selectFromSheet(id: string) {
-    sheetMode = null;
+    searchOpen = false;
     if (onTree) {
       pushState('', { focusId: id });
     } else {
@@ -69,18 +69,17 @@
   {t}
   {canGoBack}
   onBack={() => history.back()}
-  onSearch={() => (sheetMode = 'search')}
+  onSearch={() => (searchOpen = true)}
   onAdd={() => goto('/new')}
-  onEveryone={() => (sheetMode = 'all')}
   {onMe}
+  onSettings={() => goto('/settings')}
 />
 
-{#if sheetMode}
+{#if searchOpen}
   <PeopleSheet
     {t}
     locale={data.locale}
     people={data.people}
-    mode={sheetMode}
     onClose={closeSheet}
     onSelect={selectFromSheet}
   />

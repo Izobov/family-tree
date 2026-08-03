@@ -10,20 +10,12 @@
     t,
     locale,
     people,
-    mode,
     onClose,
     onSelect
   }: {
     t: Dict;
     locale: Locale;
     people: PersonWithParents[];
-    /**
-     * Один компонент, два режима: 'search' рисует строку поиска сверху,
-     * 'all' — просто список. Фильтрация в обоих случаях завязана на один
-     * и тот же `query`: в режиме 'all' поле ввода не рендерится, поэтому
-     * query остаётся пустым и filtered равен полному списку.
-     */
-    mode: 'search' | 'all';
     onClose: () => void;
     onSelect: (id: string) => void;
   } = $props();
@@ -43,15 +35,14 @@
   /**
    * Тот же приём, что и у оверлея человека в +page.svelte: role="dialog",
    * aria-modal, tabindex="-1", bind:this + $effect, переводящий фокус внутрь
-   * при открытии. В режиме поиска фокус разумнее ставить сразу в поле ввода,
-   * а не на контейнер — так пользователь может печатать без лишнего тапа.
+   * при открытии. Фокус ставим сразу в поле ввода, а не на контейнер — так
+   * можно печатать без лишнего тапа.
    */
   let dialogEl = $state<HTMLDivElement | null>(null);
   let inputEl = $state<HTMLInputElement | null>(null);
 
   $effect(() => {
-    if (mode === 'search') inputEl?.focus();
-    else dialogEl?.focus();
+    inputEl?.focus();
   });
 </script>
 
@@ -71,15 +62,13 @@
     </button>
   </header>
 
-  {#if mode === 'search'}
-    <input
-      type="search"
-      bind:value={query}
-      bind:this={inputEl}
-      placeholder={t.people.searchPlaceholder}
-      aria-label={t.people.searchPlaceholder}
-    />
-  {/if}
+  <input
+    type="search"
+    bind:value={query}
+    bind:this={inputEl}
+    placeholder={t.people.searchPlaceholder}
+    aria-label={t.people.searchPlaceholder}
+  />
 
   {#if filtered.length === 0}
     <p class="empty">{t.people.nothingFound}</p>
@@ -139,10 +128,17 @@
   }
   h2 { margin: 0; font-size: var(--font-4); }
   .close {
+    /* Как и в PersonDetail: без place-items иконка садится по базовой линии
+       текста, а не по центру кнопки. Рамку и фон из глобального button тоже
+       убираем — нужен голый крестик. */
+    display: grid;
+    place-items: center;
     min-width: var(--tap);
     min-height: var(--tap);
     padding: 0;
-    border-radius: 50%;
+    border: none;
+    background: none;
+    color: var(--muted);
   }
 
   input[type='search'] {
