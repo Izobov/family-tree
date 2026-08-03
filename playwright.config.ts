@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { TEST_BOT_TOKEN } from './e2e/telegram-helpers';
 
 export default defineConfig({
   testDir: 'e2e',
@@ -21,6 +22,12 @@ export default defineConfig({
     // Обязательно build + preview, а не dev: service worker и поведение
     // прод-сборки существуют только там.
     command: 'npm run build && npm run preview',
+    /**
+     * Сервер поднимается с тестовым токеном бота, а тест подписывает им же
+     * initData. Настоящий токен для этого не нужен: проверяется алгоритм, а не
+     * конкретный бот. Остальные переменные приходят из .env.
+     */
+    env: { TELEGRAM_BOT_TOKEN: TEST_BOT_TOKEN },
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000

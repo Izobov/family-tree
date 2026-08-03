@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { dict } from '$lib/i18n';
 import { createPerson, requireTree } from '$lib/server/people';
 import { readPersonForm, violationsToErrors } from '$lib/server/form';
+import { adoptEmail } from '$lib/server/admin';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -31,6 +32,13 @@ export const actions: Actions = {
     if (rootError) {
       console.error('root_person_id update failed:', rootError.message);
     }
+
+    /**
+     * У пришедшего из Telegram почта аккаунта синтетическая. Раз человек всё
+     * равно указал свою в форме — прописываем её и в аккаунт. Молча и не
+     * влияя на исход: подробности в adoptEmail.
+     */
+    await adoptEmail(userId!, input.email);
 
     return { created: result.id };
   }

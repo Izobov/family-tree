@@ -13,6 +13,24 @@ export const en = {
     me: 'Me',
     add: 'Add'
   },
+  telegram: {
+    connecting: 'Signing in with Telegram…',
+    chooseTitle: 'First time here',
+    chooseHint: 'Start a new tree, or link Telegram to an account you already have?',
+    createNew: 'Start a new tree',
+    haveAccount: 'I already have an account',
+    linkTitle: 'Sign in to your account',
+    linkHint: 'Once you sign in, Telegram gets linked and we will not ask for the password again.',
+    linkSubmit: 'Sign in and link',
+    back: 'Back to the choice',
+    invalid: 'Could not verify the Telegram signature. Please reopen the app from Telegram.',
+    unavailable: 'The service is temporarily unavailable. Please try again later.',
+    alreadyLinked: 'This Telegram is already linked to another account.',
+    accountTaken: 'This account already has a different Telegram linked.',
+    outsideTitle: 'Open from Telegram',
+    outsideHint: 'This page only works inside Telegram. In a browser, use the regular sign-in.',
+    toLogin: 'Regular sign-in'
+  },
   quickAdd: {
     title: 'New person',
     hint: 'Add the person now — you can link them to relatives later, from their page via “Add relative” → “Pick existing”.',
