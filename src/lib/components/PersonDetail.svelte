@@ -116,10 +116,18 @@
     position: absolute;
     top: 0;
     right: 0;
+    /* Без place-items иконка садится по базовой линии текста, а не по центру
+       кнопки — из-за этого крестик и выглядел съехавшим. */
+    display: grid;
+    place-items: center;
     min-height: var(--tap);
     min-width: var(--tap);
     padding: 0;
-    border-radius: 50%;
+    /* Голый крестик: рамка и фон из глобального стиля button здесь только
+       спорили с аватаром, который стоит рядом и сам круглый. */
+    border: none;
+    background: none;
+    color: var(--muted);
   }
   .avatar {
     width: 84px;

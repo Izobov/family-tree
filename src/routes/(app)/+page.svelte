@@ -1,7 +1,8 @@
 <script lang="ts">
   import { dict } from '$lib/i18n';
-  import { goto, preloadData, pushState } from '$app/navigation';
+  import { goto, pushState } from '$app/navigation';
   import { page } from '$app/state';
+  import { personDetail } from '$lib/tree/person-detail';
   import PersonForm from '$lib/components/PersonForm.svelte';
   import FamilyTree from '$lib/components/FamilyTree.svelte';
   import PersonDetail from '$lib/components/PersonDetail.svelte';
@@ -41,7 +42,13 @@
   /**
    * Оверлей вместо навигации: дерево остаётся смонтированным, зум и фокус
    * не слетают, а кнопка «назад» на Android закрывает панель, а не приложение.
-   * Если предзагрузка не удалась — обычный переход как фоллбэк.
+   *
+   * Данные собираем прямо здесь, а не через preloadData: весь список людей и
+   * браков уже пришёл в layout, и ходить за ним на сервер — это лишний
+   * round-trip до Vercel плюс четыре запроса к Supabase ради того, что лежит
+   * в двух шагах. Именно из-за него профиль открывался с задержкой. Функция
+   * общая с серверным load, так что прямой переход по /person/<id> покажет
+   * ровно то же самое.
    *
    * focusId переносим в состояние оверлея явно: у каждой записи истории
    * своё состояние, и если его не повторить, при открытии оверлея поверх
@@ -49,17 +56,16 @@
    * FamilyTree откатится на корень ещё до того, как пользователь нажал
    * «назад» — дерево дёрнется на глазах вместе с открытием панели.
    */
-  async function openPerson(id: string) {
-    const href = `/person/${id}`;
-    const result = await preloadData(href);
-    if (result.type === 'loaded' && result.status === 200) {
-      pushState(href, {
-        personDetail: result.data as App.PageState['personDetail'],
-        focusId
-      });
-    } else {
-      goto(href);
+  function openPerson(id: string) {
+    const detail = personDetail(data.people, data.spouses, id);
+    // Человека нет в загруженном дереве — случай неожиданный, поэтому
+    // отдаём его обычной навигации, а не показываем пустой оверлей.
+    if (!detail) {
+      goto(`/person/${id}`);
+      return;
     }
+
+    pushState(`/person/${id}`, { personDetail: detail, focusId });
   }
 </script>
 
@@ -128,12 +134,11 @@
 
   .canvas {
     position: fixed;
-    /* Сверху вычитаем хедер (sticky, но .canvas — fixed и не участвует в
-       потоке, поэтому не подвинется под него сам). Снизу — нижнюю панель:
-       без этого низ дерева уезжает под неё и остаётся недостижимым для
-       пальца. Те же токены читает и BottomNav, и хедер в layout — три места
-       не могут разойтись во мнении, где кончается дерево. */
-    inset: var(--header-h) 0 calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)) 0;
+    /* Сверху ничего не вычитаем: верхней панели больше нет, дерево занимает
+       экран целиком. Снизу — нижнюю панель: без этого низ дерева уезжает под
+       неё и остаётся недостижимым для пальца. Тот же токен читает BottomNav,
+       чтобы два места не разошлись во мнении, где кончается дерево. */
+    inset: 0 0 calc(var(--bottom-nav-h) + env(safe-area-inset-bottom)) 0;
   }
 
   .overlay {

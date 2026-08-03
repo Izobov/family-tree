@@ -74,10 +74,7 @@ test('регистрация, построение дерева, правка, �
   await page.getByRole('button', { name: 'Все' }).click();
   await expect(page.getByText('Сергей Волков')).toBeVisible();
 
-  // Переключение языка.
   await page.goto('/');
-  await page.getByRole('button', { name: 'EN' }).click();
-  await expect(page.getByRole('link', { name: 'Tree' })).toBeVisible();
 
   // Уборка за собой: тест создаёт реальные записи в живом проекте Supabase,
   // поэтому прогон обязан оставить базу такой же, какой её нашёл — только
@@ -86,14 +83,14 @@ test('регистрация, построение дерева, правка, �
   // возвращается к онбордингу, что само по себе подтверждает, что людей
   // в дереве больше не осталось.
   await page.goto(`/person/${sergeyId}/delete`);
-  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'Удалить' }).click();
   await expect(page).toHaveURL('/');
 
   await page.goto(`/person/${petrId}/delete`);
-  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'Удалить' }).click();
   await expect(page).toHaveURL('/');
 
   await page.goto(`/person/${ivanId}/delete`);
-  await page.getByRole('button', { name: 'Delete' }).click();
-  await expect(page.getByRole('heading', { name: 'Tell us about yourself' })).toBeVisible();
+  await page.getByRole('button', { name: 'Удалить' }).click();
+  await expect(page.getByRole('heading', { name: 'Расскажите о себе' })).toBeVisible();
 });

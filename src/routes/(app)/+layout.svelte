@@ -2,11 +2,9 @@
   import { dict } from '$lib/i18n';
   import { goto, pushState } from '$app/navigation';
   import { page } from '$app/state';
-  import LangSwitch from '$lib/components/LangSwitch.svelte';
   import OfflineBanner from '$lib/components/OfflineBanner.svelte';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import PeopleSheet from '$lib/components/PeopleSheet.svelte';
-  import Icon from '$lib/components/Icon.svelte';
 
   let { data, children } = $props();
   let t = $derived(dict(data.locale));
@@ -63,18 +61,6 @@
 
 <OfflineBanner {t} />
 
-<header>
-  <a class="home" href="/">{t.nav.tree}</a>
-  <div class="right">
-    <LangSwitch current={data.locale} />
-    <form method="POST" action="/signout">
-      <button type="submit" class="icon-btn">
-        <Icon name="signOut" size={20} label={t.nav.signOut} />
-      </button>
-    </form>
-  </div>
-</header>
-
 <div class="content">
   {@render children()}
 </div>
@@ -101,47 +87,12 @@
 {/if}
 
 <style>
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    height: var(--header-h);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    padding: 0 var(--space-3);
-    background: var(--surface);
-    border-bottom: 1px solid var(--line);
-  }
-  .home {
-    color: var(--fg);
-    font-weight: 600;
-    font-size: var(--font-3);
-    text-decoration: none;
-    padding: var(--space-2);
-  }
-  .right {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-  .icon-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: var(--tap);
-    min-height: var(--tap);
-    padding: 0;
-    color: var(--muted);
-  }
-
   .content {
     /* Единственная точка, где под нижнюю панель резервируется место — вместо
        того чтобы патчить это в каждом экране (app) отдельно. На экране
        дерева это не задваивает вычет: .canvas там position:fixed и inset,
        заданный в её собственном CSS, эти отступы контейнера не учитывает —
-       он читает --bottom-nav-h и --header-h напрямую, из тех же токенов. */
+       он читает --bottom-nav-h напрямую, из того же токена. */
     padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom));
   }
 </style>

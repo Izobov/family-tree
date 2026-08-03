@@ -12,6 +12,10 @@ export type TelegramWebApp = {
   initData: string;
   ready: () => void;
   expand: () => void;
+  /** Появился в Bot API 6.1 — на старых клиентах его может не быть. */
+  HapticFeedback?: {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+  };
 };
 
 function existing(): TelegramWebApp | null {
@@ -42,4 +46,16 @@ export function loadTelegramWebApp(): Promise<TelegramWebApp | null> {
   });
 
   return pending;
+}
+
+/**
+ * Короткий тактильный отклик на нажатие. Вне Telegram — молча ничего: ни SDK,
+ * ни HapticFeedback там нет, и это не ошибка, а обычная работа в браузере.
+ * Поэтому здесь только необязательные обращения и никаких await — отклик
+ * обязан случиться в тот же тик, что и нажатие, иначе он ощущается запоздалым.
+ */
+export function haptic(style: 'light' | 'medium' = 'light'): void {
+  if (typeof window === 'undefined') return;
+  const webApp = (window as unknown as { Telegram?: { WebApp?: TelegramWebApp } }).Telegram?.WebApp;
+  webApp?.HapticFeedback?.impactOccurred(style);
 }

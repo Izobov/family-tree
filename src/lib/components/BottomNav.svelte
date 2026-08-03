@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Dict } from '$lib/i18n';
   import Icon from './Icon.svelte';
+  import { haptic } from '$lib/telegram-sdk';
 
   let {
     t,
@@ -20,14 +21,27 @@
     onEveryone: () => void;
     onMe: () => void;
   } = $props();
+
+  /**
+   * Отклик вешаем здесь, а не в каждом обработчике снаружи: панель — это
+   * единственное место в приложении, где кнопки нажимают пальцем подряд, и
+   * держать решение «отзываться ли» в одном месте проще, чем в пяти.
+   * Вне Telegram haptic() молча ничего не делает.
+   */
+  function tap(handler: () => void): () => void {
+    return () => {
+      haptic();
+      handler();
+    };
+  }
 </script>
 
 <nav class="bar">
-  <button type="button" disabled={!canGoBack} onclick={onBack}>
+  <button type="button" disabled={!canGoBack} onclick={tap(onBack)}>
     <Icon name="back" size={24} />
     <span>{t.nav.back}</span>
   </button>
-  <button type="button" onclick={onSearch}>
+  <button type="button" onclick={tap(onSearch)}>
     <Icon name="search" size={24} />
     <span>{t.nav.search}</span>
   </button>
@@ -37,15 +51,15 @@
     можно было завести только как родственника кого-то существующего, и завести
     его «просто так, свяжу потом» было негде.
   -->
-  <button type="button" class="add" onclick={onAdd}>
+  <button type="button" class="add" onclick={tap(onAdd)}>
     <Icon name="add" size={24} />
     <span>{t.nav.add}</span>
   </button>
-  <button type="button" onclick={onEveryone}>
+  <button type="button" onclick={tap(onEveryone)}>
     <Icon name="people" size={24} />
     <span>{t.nav.everyone}</span>
   </button>
-  <button type="button" onclick={onMe}>
+  <button type="button" onclick={tap(onMe)}>
     <Icon name="me" size={24} />
     <span>{t.nav.me}</span>
   </button>
