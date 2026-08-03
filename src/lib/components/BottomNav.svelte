@@ -7,6 +7,7 @@
     canGoBack,
     onBack,
     onSearch,
+    onAdd,
     onEveryone,
     onMe
   }: {
@@ -15,6 +16,7 @@
     canGoBack: boolean;
     onBack: () => void;
     onSearch: () => void;
+    onAdd: () => void;
     onEveryone: () => void;
     onMe: () => void;
   } = $props();
@@ -28,6 +30,16 @@
   <button type="button" onclick={onSearch}>
     <Icon name="search" size={24} />
     <span>{t.nav.search}</span>
+  </button>
+  <!--
+    Единственное действие на панели, а не навигация, поэтому стоит в середине
+    (самое доступное большому пальцу место) и выделено акцентом: раньше человека
+    можно было завести только как родственника кого-то существующего, и завести
+    его «просто так, свяжу потом» было негде.
+  -->
+  <button type="button" class="add" onclick={onAdd}>
+    <Icon name="add" size={24} />
+    <span>{t.nav.add}</span>
   </button>
   <button type="button" onclick={onEveryone}>
     <Icon name="people" size={24} />
@@ -76,5 +88,9 @@
   }
   button span {
     font-size: var(--font-1);
+  }
+  .add {
+    color: var(--accent);
+    font-weight: 600;
   }
 </style>

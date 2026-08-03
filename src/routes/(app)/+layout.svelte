@@ -84,6 +84,7 @@
   {canGoBack}
   onBack={() => history.back()}
   onSearch={() => (sheetMode = 'search')}
+  onAdd={() => goto('/new')}
   onEveryone={() => (sheetMode = 'all')}
   {onMe}
 />

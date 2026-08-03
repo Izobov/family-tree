@@ -2,7 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: 'e2e',
-  timeout: 30_000,
+  // Сценарий сквозной и длинный: регистрация, четыре создания, правка,
+  // смена языка и уборка за собой — всё против живого Supabase, где каждый
+  // шаг это реальный сетевой round-trip. В 30 с он перестал укладываться.
+  timeout: 60_000,
   fullyParallel: false,
   workers: 1,
   use: {

@@ -57,7 +57,25 @@ test('регистрация, построение дерева, правка, �
   await page.goto('/');
   await expect(page.locator('.ft-card')).toHaveCount(2);
 
+  // Быстрое создание: «+» в нижней панели заводит человека вообще без связей.
+  // В диаграмме его закономерно нет — family-chart рисует только тех, кто
+  // связан с человеком в фокусе, — поэтому карточек по-прежнему две. Найти
+  // его можно в списке «Все», оттуда же и связать позже.
+  await page.getByRole('button', { name: 'Добавить' }).click();
+  await expect(page.getByRole('heading', { name: 'Новый человек' })).toBeVisible();
+  await page.getByLabel('Имя').fill('Сергей');
+  await page.getByLabel('Фамилия').fill('Волков');
+  await page.getByRole('button', { name: 'Создать' }).click();
+  await expect(page.getByRole('heading', { name: 'Сергей Волков' })).toBeVisible();
+  const sergeyId = new URL(page.url()).pathname.split('/')[2];
+
+  await page.goto('/');
+  await expect(page.locator('.ft-card')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Все' }).click();
+  await expect(page.getByText('Сергей Волков')).toBeVisible();
+
   // Переключение языка.
+  await page.goto('/');
   await page.getByRole('button', { name: 'EN' }).click();
   await expect(page.getByRole('link', { name: 'Tree' })).toBeVisible();
 
@@ -67,6 +85,10 @@ test('регистрация, построение дерева, правка, �
   // первым (root ещё жив, дерево рисуется штатно), затем корень — экран
   // возвращается к онбордингу, что само по себе подтверждает, что людей
   // в дереве больше не осталось.
+  await page.goto(`/person/${sergeyId}/delete`);
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await expect(page).toHaveURL('/');
+
   await page.goto(`/person/${petrId}/delete`);
   await page.getByRole('button', { name: 'Delete' }).click();
   await expect(page).toHaveURL('/');

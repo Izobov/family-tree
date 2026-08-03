@@ -24,7 +24,8 @@ import {
   mdiMagnify,
   mdiAccountGroup,
   mdiAccountCircle,
-  mdiLogout
+  mdiLogout,
+  mdiPlus
 } from '@mdi/js';
 
 export const icons = {
@@ -58,6 +59,10 @@ export const icons = {
   search: mdiMagnify,
   people: mdiAccountGroup,
   me: mdiAccountCircle,
+  // Быстрое создание человека. Плюс — единственный символ, который на нижней
+  // панели читается как «добавить» без подписи, поэтому берём именно его, а не
+  // «человек с плюсом»: на 24px тот превращается в кашу.
+  add: mdiPlus,
   // Хедер: кнопка выхода из аккаунта — только иконка, подпись даём через
   // aria-label, чтобы хедер оставался компактным на телефоне.
   signOut: mdiLogout

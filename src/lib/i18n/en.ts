@@ -10,7 +10,13 @@ export const en = {
     back: 'Back',
     search: 'Search',
     everyone: 'Everyone',
-    me: 'Me'
+    me: 'Me',
+    add: 'Add'
+  },
+  quickAdd: {
+    title: 'New person',
+    hint: 'Add the person now — you can link them to relatives later, from their page via “Add relative” → “Pick existing”.',
+    submit: 'Create'
   },
   auth: {
     signInTitle: 'Sign in',
