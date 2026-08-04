@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { onMount, tick } from 'svelte';
   import { dict } from '$lib/i18n';
   import { loadTelegramWebApp } from '$lib/telegram-sdk';
@@ -59,7 +60,7 @@
       <p class="muted">{t.telegram.connecting}</p>
     </div>
 
-    <form method="POST" action="?/auto" bind:this={autoForm} hidden>
+    <form use:pending method="POST" action="?/auto" bind:this={autoForm} hidden>
       <input type="hidden" name="init_data" value={initData} />
     </form>
   {:else if phase === 'outside'}
@@ -75,7 +76,7 @@
       <h1>{t.telegram.chooseTitle}</h1>
       <p class="muted">{t.telegram.chooseHint}</p>
 
-      <form method="POST" action="?/signup">
+      <form use:pending method="POST" action="?/signup">
         <input type="hidden" name="init_data" value={initData} />
         <button type="submit" class="btn btn--primary">{t.telegram.createNew}</button>
       </form>
@@ -87,7 +88,7 @@
       <h1>{t.telegram.linkTitle}</h1>
       <p class="muted">{t.telegram.linkHint}</p>
 
-      <form method="POST" action="?/link">
+      <form use:pending method="POST" action="?/link">
         <input type="hidden" name="init_data" value={initData} />
         <label>
           {t.auth.email}

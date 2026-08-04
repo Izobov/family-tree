@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import type { Dict } from '$lib/i18n';
 
   let {
@@ -23,7 +24,7 @@
 <main>
   <h1>{title}</h1>
 
-  <form method="POST">
+  <form use:pending method="POST">
     <label>
       {t.auth.email}
       <input name="email" type="email" autocomplete="email" required />

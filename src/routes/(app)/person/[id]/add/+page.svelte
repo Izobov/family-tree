@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { page } from '$app/state';
   import { dict } from '$lib/i18n';
   import PersonForm from '$lib/components/PersonForm.svelte';
@@ -96,7 +97,7 @@
 {/snippet}
 
     {#if mode === 'create'}
-      <form method="POST" action="?/create">
+      <form use:pending method="POST" action="?/create">
         <input type="hidden" name="kind" value={kind} />
         <!--
           Дата свадьбы и второй родитель передаются сниппетом, а не ставятся
@@ -113,7 +114,7 @@
         />
       </form>
     {:else}
-      <form method="POST" action="?/link">
+      <form use:pending method="POST" action="?/link">
         <input type="hidden" name="kind" value={kind} />
         {#if form?.errors?._}<p class="err err--form" role="alert">{form.errors._}</p>{/if}
         {#if candidates.length === 0}

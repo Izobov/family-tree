@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { dict } from '$lib/i18n';
   import { goto, pushState } from '$app/navigation';
   import { page } from '$app/state';
@@ -73,7 +74,7 @@
   <main class="onboarding">
     <h1>{t.onboarding.title}</h1>
     <p>{t.onboarding.hint}</p>
-    <form method="POST" action="?/createFirst">
+    <form use:pending method="POST" action="?/createFirst">
       <PersonForm
         {t}
         errors={form?.errors ?? {}}

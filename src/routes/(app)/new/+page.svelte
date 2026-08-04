@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { dict } from '$lib/i18n';
   import PersonForm from '$lib/components/PersonForm.svelte';
 
@@ -11,7 +12,7 @@
   <h1>{t.quickAdd.title}</h1>
   <p class="hint">{t.quickAdd.hint}</p>
 
-  <form method="POST">
+  <form use:pending method="POST">
     <PersonForm
       {t}
       errors={form?.errors ?? {}}

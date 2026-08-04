@@ -23,3 +23,43 @@ button {
 }
 
 button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/**
+ * Форма в полёте — см. use:pending в $lib/actions/pending.
+ *
+ * Подпись прячем прозрачным цветом, а не display:none: так кнопка сохраняет
+ * свою ширину и высоту, и в момент отправки ничего не прыгает. Крутилке
+ * currentColor поэтому не годится, ей нужны явные цвета.
+ *
+ * opacity возвращаем в 1: глобальное правило выше приглушает отключённые
+ * кнопки, но здесь кнопка не «недоступна», а «занята», и выглядеть должна
+ * живой.
+ */
+form[data-pending] button:disabled {
+  position: relative;
+  opacity: 1;
+  color: transparent;
+  cursor: progress;
+}
+
+form[data-pending] button:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  form[data-pending] button:disabled::after { animation-duration: 2.5s; }
+}

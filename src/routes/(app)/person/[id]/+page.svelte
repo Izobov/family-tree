@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { page } from '$app/state';
   import { dict } from '$lib/i18n';
   import PersonDetail from '$lib/components/PersonDetail.svelte';
@@ -21,7 +22,7 @@
   <a class="back" href="/">← {t.nav.tree}</a>
 
   {#if editing}
-    <form method="POST" action="?/update" class="edit">
+    <form use:pending method="POST" action="?/update" class="edit">
       <PersonForm
         {t}
         person={data.person}

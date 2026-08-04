@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import { dict } from '$lib/i18n';
 
   let { data } = $props();
@@ -25,7 +26,7 @@
   {/if}
 
   <div class="actions">
-    <form method="POST" action="?/confirm">
+    <form use:pending method="POST" action="?/confirm">
       <button type="submit" class="danger">{t.deleteDialog.confirm}</button>
     </form>
     <a href="/person/{data.person.id}">{t.deleteDialog.cancel}</a>

@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { pending } from '$lib/actions/pending';
   import type { Locale } from '$lib/types';
   import { locales } from '$lib/i18n';
 
   let { current }: { current: Locale } = $props();
 </script>
 
-<form method="POST" action="/locale">
+<form use:pending method="POST" action="/locale">
   {#each locales as locale (locale)}
     <button
       type="submit"
